@@ -39,8 +39,15 @@ export const SESSIONS_FILE = path.join(
   "last_conversations.json",
 );
 
+// agy reads stdin until EOF even in print mode; an open stdin pipe hangs it forever.
+export const execWithClosedStdin: ExecFn = (file, args, options) => {
+  const promise = execFileAsync(file, args, options);
+  promise.child.stdin?.end();
+  return promise;
+};
+
 export const defaultDeps: RunnerDeps = {
-  exec: (file, args, options) => execFileAsync(file, args, options),
+  exec: execWithClosedStdin,
   readSessionsFile: () => readFile(SESSIONS_FILE, "utf8"),
 };
 

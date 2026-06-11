@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildArgs, truncate, runAgy, type ExecFn } from "../src/runner.js";
+import { buildArgs, truncate, runAgy, execWithClosedStdin, type ExecFn } from "../src/runner.js";
 import type { Config } from "../src/config.js";
 
 const cfg: Config = {
@@ -48,6 +48,18 @@ describe("truncate", () => {
     expect(r.truncated).toBe(true);
     expect(r.text).toContain("x".repeat(100));
     expect(r.text).toMatch(/truncated at 100.*150/s);
+  });
+});
+
+describe("execWithClosedStdin", () => {
+  it("closes child stdin so stdin-reading commands exit instead of hanging", async () => {
+    // cat with an open stdin pipe never exits; this would time out without the fix
+    const r = await execWithClosedStdin("cat", [], {
+      cwd: process.cwd(),
+      timeout: 5000,
+      maxBuffer: 1024,
+    });
+    expect(r.stdout).toBe("");
   });
 });
 

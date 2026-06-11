@@ -1,12 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { loadConfig, type Config } from "./config.js";
 import { ModelRegistry } from "./models.js";
-import { runAgy, defaultDeps, type RunnerDeps } from "./runner.js";
+import { runAgy, defaultDeps, execWithClosedStdin, type RunnerDeps } from "./runner.js";
 import { TOOLS, type ToolDef } from "./tools.js";
-
-const execFileAsync = promisify(execFile);
 
 interface ToolResponse {
   [key: string]: unknown;
@@ -55,7 +51,11 @@ export function createToolHandler(
 export function createServer(): McpServer {
   const cfg = loadConfig();
   const registry = new ModelRegistry(async () => {
-    const { stdout } = await execFileAsync(cfg.agyPath, ["models"], { timeout: 30_000 });
+    const { stdout } = await execWithClosedStdin(cfg.agyPath, ["models"], {
+      cwd: process.cwd(),
+      timeout: 30_000,
+      maxBuffer: 1024 * 1024,
+    });
     return stdout;
   });
 

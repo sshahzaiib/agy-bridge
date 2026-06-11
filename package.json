@@ -1,28 +1,48 @@
 {
   "name": "agy-bridge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP bridge that lets Claude Code delegate heavy tasks to the Antigravity CLI (agy) — purpose-built tools, model routing with fallback, and multi-turn session continuity.",
   "type": "module",
-  "bin": { "agy-bridge": "dist/index.js" },
-  "files": ["dist", "CLAUDE.md", "SKILL.md", "README.md", "LICENSE"],
-  "engines": { "node": ">=18" },
+  "bin": {
+    "agy-bridge": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "CLAUDE.md",
+    "SKILL.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["mcp", "claude-code", "antigravity", "agy", "gemini", "delegation"],
+  "keywords": [
+    "mcp",
+    "claude-code",
+    "antigravity",
+    "agy",
+    "gemini",
+    "delegation"
+  ],
   "author": "Shahzaib (https://github.com/sshahzaiib)",
-  "repository": { "type": "git", "url": "git+https://github.com/sshahzaiib/agy-bridge.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sshahzaiib/agy-bridge.git"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
-    "vitest": "^3.0.0",
-    "@types/node": "^20.0.0"
+    "vitest": "^3.0.0"
   }
 }

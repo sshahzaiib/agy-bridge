@@ -12,6 +12,7 @@ const cfg: Config = {
   defaultModel: undefined,
   skipPermissions: true,
   sandbox: false,
+  onFailure: "fallback",
 };
 
 const LISTING = "Gemini 3.5 Flash (High)\nGemini 3.1 Pro (High)\n";
@@ -71,6 +72,27 @@ describe("createToolHandler", () => {
     );
     const res = await handler({ prompt: "x" });
     expect(res.isError).toBe(true);
-    expect((res.content[0] as { text: string }).text).toContain("kaboom");
+    const text = (res.content[0] as { text: string }).text;
+    expect(text).toContain("kaboom");
+    expect(text).not.toContain("Do NOT perform this work yourself");
+  });
+
+  it("strict mode appends do-not-fallback instruction to errors", async () => {
+    const handler = createToolHandler(
+      TOOLS.find((t) => t.name === "delegate")!,
+      { ...cfg, onFailure: "strict" },
+      new ModelRegistry(async () => LISTING),
+      {
+        exec: async () => {
+          throw new Error("kaboom");
+        },
+        readSessionsFile: async () => "{}",
+      },
+    );
+    const res = await handler({ prompt: "x" });
+    expect(res.isError).toBe(true);
+    const text = (res.content[0] as { text: string }).text;
+    expect(text).toContain("kaboom");
+    expect(text).toContain("Do NOT perform this work yourself");
   });
 });

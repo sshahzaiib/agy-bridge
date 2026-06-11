@@ -72,6 +72,11 @@ All optional, via environment variables:
 | `AGY_DEFAULT_MODEL` | unset | Fallback model when no chain entry is available |
 | `AGY_SKIP_PERMISSIONS` | `true` | Pass `--dangerously-skip-permissions` to agy |
 | `AGY_SANDBOX` | `false` | Run agy with `--sandbox` |
+| `AGY_ON_FAILURE` | `fallback` | `strict` appends an instruction to failed-tool errors telling the calling agent not to absorb the work itself |
+
+### Failure behavior
+
+The bridge always fails loudly: agy errors surface as MCP tool errors with agy's actual stderr, and degraded model routing is annotated in the response footer. By default the calling agent (Claude) will typically do the work itself after a failure — visible in the transcript, but easy to stop noticing in a long session. Set `AGY_ON_FAILURE=strict` to append an explicit "do NOT perform this work yourself — report the failure to the user" instruction to every delegation error, so you keep control over when token savings are silently lost.
 
 ## Development
 

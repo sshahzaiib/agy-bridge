@@ -5,6 +5,7 @@ export interface Config {
   defaultModel: string | undefined;
   skipPermissions: boolean;
   sandbox: boolean;
+  onFailure: "strict" | "fallback";
 }
 
 function positiveInt(raw: string | undefined, fallback: number): number {
@@ -20,5 +21,6 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     defaultModel: env.AGY_DEFAULT_MODEL || undefined,
     skipPermissions: env.AGY_SKIP_PERMISSIONS !== "false",
     sandbox: env.AGY_SANDBOX === "true",
+    onFailure: env.AGY_ON_FAILURE === "strict" ? "strict" : "fallback",
   };
 }

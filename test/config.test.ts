@@ -11,6 +11,7 @@ describe("loadConfig", () => {
       defaultModel: undefined,
       skipPermissions: true,
       sandbox: false,
+      onFailure: "fallback",
     });
   });
 
@@ -35,5 +36,13 @@ describe("loadConfig", () => {
     const c = loadConfig({ AGY_TIMEOUT: "abc", AGY_MAX_OUTPUT_CHARS: "-5" });
     expect(c.timeoutSec).toBe(1200);
     expect(c.maxOutputChars).toBe(50_000);
+  });
+
+  it("reads AGY_ON_FAILURE=strict", () => {
+    expect(loadConfig({ AGY_ON_FAILURE: "strict" }).onFailure).toBe("strict");
+  });
+
+  it("treats unknown AGY_ON_FAILURE values as fallback", () => {
+    expect(loadConfig({ AGY_ON_FAILURE: "explode" }).onFailure).toBe("fallback");
   });
 });

@@ -9,6 +9,7 @@ const cfg: Config = {
   defaultModel: undefined,
   skipPermissions: true,
   sandbox: false,
+  onFailure: "fallback",
 };
 
 describe("buildArgs", () => {

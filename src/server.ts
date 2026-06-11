@@ -40,8 +40,14 @@ export function createToolHandler(
         content: [{ type: "text", text: `${result.output}\n\n---\n[agy-bridge] ${meta.join(" | ")}` }],
       };
     } catch (err) {
+      let text = (err as Error).message;
+      if (cfg.onFailure === "strict") {
+        text +=
+          "\n\n[agy-bridge strict mode] Delegation failed. Do NOT perform this work yourself " +
+          "in the main context — report the failure to the user and let them decide how to proceed.";
+      }
       return {
-        content: [{ type: "text", text: (err as Error).message }],
+        content: [{ type: "text", text }],
         isError: true,
       };
     }

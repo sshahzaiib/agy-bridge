@@ -33,7 +33,7 @@ User → Claude Code → agy-bridge (MCP) → agy CLI → Gemini / Claude / GPT-
 claude mcp add -s user agy-bridge npx -- -y agy-bridge
 
 # 2. Add delegation rules to your project (or ~/.claude/CLAUDE.md for global)
-curl -o CLAUDE.md https://raw.githubusercontent.com/zaibansari/agy-bridge/main/CLAUDE.md
+curl -o CLAUDE.md https://raw.githubusercontent.com/sshahzaiib/agy-bridge/main/CLAUDE.md
 ```
 
 ## Tools

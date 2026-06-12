@@ -1,6 +1,8 @@
 export interface Config {
   agyPath: string;
   timeoutSec: number;
+  /** True when AGY_TIMEOUT was set explicitly; overrides per-tool timeouts. */
+  timeoutExplicit: boolean;
   maxOutputChars: number;
   defaultModel: string | undefined;
   skipPermissions: boolean;
@@ -17,6 +19,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   return {
     agyPath: env.AGY_PATH || "agy",
     timeoutSec: positiveInt(env.AGY_TIMEOUT, 1200),
+    timeoutExplicit: positiveInt(env.AGY_TIMEOUT, 0) > 0,
     maxOutputChars: positiveInt(env.AGY_MAX_OUTPUT_CHARS, 50_000),
     defaultModel: env.AGY_DEFAULT_MODEL || undefined,
     skipPermissions: env.AGY_SKIP_PERMISSIONS !== "false",

@@ -19,6 +19,17 @@ describe("TOOLS", () => {
       else expect(t.chain.length).toBeGreaterThan(0);
     }
   });
+
+  it("every tool has a sane per-tool timeout", () => {
+    for (const t of TOOLS) {
+      expect(t.timeoutSec).toBeGreaterThan(0);
+      expect(t.timeoutSec).toBeLessThanOrEqual(600);
+    }
+  });
+
+  it("web_lookup fails fast (well under the old 20-minute default)", () => {
+    expect(TOOLS.find((t) => t.name === "web_lookup")!.timeoutSec).toBeLessThanOrEqual(180);
+  });
 });
 
 describe("resolveFiles", () => {

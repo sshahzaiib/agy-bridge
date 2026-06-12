@@ -7,6 +7,7 @@ describe("loadConfig", () => {
     expect(c).toEqual({
       agyPath: "agy",
       timeoutSec: 1200,
+      timeoutExplicit: false,
       maxOutputChars: 50_000,
       defaultModel: undefined,
       skipPermissions: true,
@@ -26,6 +27,7 @@ describe("loadConfig", () => {
     });
     expect(c.agyPath).toBe("/opt/agy");
     expect(c.timeoutSec).toBe(300);
+    expect(c.timeoutExplicit).toBe(true);
     expect(c.maxOutputChars).toBe(1000);
     expect(c.defaultModel).toBe("Gemini 3.1 Pro (High)");
     expect(c.skipPermissions).toBe(false);
@@ -35,6 +37,7 @@ describe("loadConfig", () => {
   it("falls back to defaults on non-numeric values", () => {
     const c = loadConfig({ AGY_TIMEOUT: "abc", AGY_MAX_OUTPUT_CHARS: "-5" });
     expect(c.timeoutSec).toBe(1200);
+    expect(c.timeoutExplicit).toBe(false);
     expect(c.maxOutputChars).toBe(50_000);
   });
 

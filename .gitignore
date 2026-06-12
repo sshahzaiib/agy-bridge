@@ -1,4 +1,5 @@
 node_modules/
 dist/
 *.log
-docs
+docs/*
+!docs/multi-client-support.md

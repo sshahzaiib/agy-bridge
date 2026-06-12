@@ -1,0 +1,57 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.sshahzaiib/agy-bridge",
+  "description": "MCP bridge that lets Claude Code delegate heavy tasks to the Antigravity CLI (agy) — purpose-built tools, quota-aware model failover, and multi-turn session continuity.",
+  "repository": {
+    "url": "https://github.com/sshahzaiib/agy-bridge",
+    "source": "github"
+  },
+  "version": "0.3.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "agy-bridge",
+      "version": "0.3.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Path to the agy binary (defaults to `agy` on PATH)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "AGY_PATH"
+        },
+        {
+          "description": "Override the per-tool timeouts, in seconds",
+          "isRequired": false,
+          "format": "number",
+          "isSecret": false,
+          "name": "AGY_TIMEOUT"
+        },
+        {
+          "description": "Truncation cap for tool output, in characters (default 50000)",
+          "isRequired": false,
+          "format": "number",
+          "isSecret": false,
+          "name": "AGY_MAX_OUTPUT_CHARS"
+        },
+        {
+          "description": "Fallback model when no chain entry is available",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "AGY_DEFAULT_MODEL"
+        },
+        {
+          "description": "Set to `strict` to instruct the calling agent not to absorb failed delegations (default `fallback`)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "AGY_ON_FAILURE"
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 {
   "name": "agy-bridge",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP bridge that lets Claude Code delegate heavy tasks to the Antigravity CLI (agy) — purpose-built tools, model routing with fallback, and multi-turn session continuity.",
+  "mcpName": "io.github.sshahzaiib/agy-bridge",
   "type": "module",
   "bin": {
     "agy-bridge": "dist/index.js"

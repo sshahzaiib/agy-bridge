@@ -109,7 +109,7 @@ export function createServer(): McpServer {
   });
   const cooldowns = new CooldownRegistry();
 
-  const server = new McpServer({ name: "agy-bridge", version: "0.3.0" });
+  const server = new McpServer({ name: "agy-bridge", version: "0.3.1" });
   for (const tool of TOOLS) {
     server.registerTool(
       tool.name,

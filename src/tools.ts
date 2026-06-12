@@ -28,6 +28,8 @@ export interface ToolDef {
   description: string;
   schema: z.ZodRawShape;
   chain: string[];
+  /** Default --print-timeout for this tool, in seconds. AGY_TIMEOUT overrides. */
+  timeoutSec: number;
   buildPrompt(args: Record<string, unknown>, cwd: string): string;
 }
 
@@ -48,6 +50,7 @@ export const TOOLS: ToolDef[] = [
       ...commonShape,
     },
     chain: ["Gemini 3.5 Flash (High)", "Gemini 3.1 Pro (Low)"],
+    timeoutSec: 300,
     buildPrompt(args, cwd) {
       const files = resolveFiles(args.files as string[], cwd);
       return (
@@ -69,6 +72,7 @@ export const TOOLS: ToolDef[] = [
       ...commonShape,
     },
     chain: ["Gemini 3.5 Flash (Medium)", "Gemini 3.5 Flash (High)"],
+    timeoutSec: 180,
     buildPrompt(args) {
       return (
         `Search this repository to answer the following. Use git log, git diff, git blame, ` +
@@ -88,6 +92,7 @@ export const TOOLS: ToolDef[] = [
       ...commonShape,
     },
     chain: ["Gemini 3.5 Flash (Medium)", "Gemini 3.5 Flash (High)"],
+    timeoutSec: 120,
     buildPrompt(args) {
       return `Look up on the web: ${args.query}\n\nInclude source URLs for key claims. ${OUTPUT_RULES}`;
     },
@@ -108,6 +113,7 @@ export const TOOLS: ToolDef[] = [
       ...commonShape,
     },
     chain: ["Gemini 3.1 Pro (High)", "Claude Opus 4.6 (Thinking)", "Gemini 3.5 Flash (High)"],
+    timeoutSec: 300,
     buildPrompt(args, cwd) {
       const files = args.files as string[] | undefined;
       const content = args.content as string | undefined;
@@ -140,6 +146,7 @@ export const TOOLS: ToolDef[] = [
       ...commonShape,
     },
     chain: [],
+    timeoutSec: 300,
     buildPrompt(args) {
       return args.question as string;
     },
@@ -154,6 +161,7 @@ export const TOOLS: ToolDef[] = [
       ...commonShape,
     },
     chain: ["Gemini 3.5 Flash (High)"],
+    timeoutSec: 600,
     buildPrompt(args) {
       return args.prompt as string;
     },

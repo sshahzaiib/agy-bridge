@@ -1,5 +1,11 @@
 # agy-bridge
 
+[![CI](https://github.com/sshahzaiib/agy-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/sshahzaiib/agy-bridge/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/agy-bridge)](https://www.npmjs.com/package/agy-bridge)
+[![npm downloads](https://img.shields.io/npm/dm/agy-bridge)](https://www.npmjs.com/package/agy-bridge)
+[![node](https://img.shields.io/node/v/agy-bridge)](https://nodejs.org)
+[![license](https://img.shields.io/npm/l/agy-bridge)](LICENSE)
+
 An MCP bridge that lets **Claude Code delegate heavy tasks to the Antigravity CLI (`agy`)** — saving Claude's context window and tokens for what matters.
 
 Claude sends a task → the bridge routes it to the best available model via `agy` → only the answer comes back. Large files, deep git searches, and web lookups never touch Claude's context.
@@ -86,6 +92,18 @@ npm test           # vitest unit tests (exec mocked — no agy needed)
 npm run typecheck
 npm run build      # tsup → dist/index.js
 ```
+
+## Contributors
+
+Contributions are welcome — open an issue or PR.
+
+<a href="https://github.com/sshahzaiib/agy-bridge/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=sshahzaiib/agy-bridge" alt="Contributors" />
+</a>
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=sshahzaiib/agy-bridge&type=Date)](https://www.star-history.com/#sshahzaiib/agy-bridge&Date)
 
 ## License
 

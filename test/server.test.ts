@@ -10,6 +10,7 @@ const cfg: Config = {
   agyPath: "agy",
   timeoutSec: 600,
   timeoutExplicit: false,
+  perToolTimeouts: {},
   maxOutputChars: 50_000,
   defaultModel: undefined,
   skipPermissions: true,
@@ -108,6 +109,24 @@ describe("createToolHandler", () => {
     await handlerFor("web_lookup", f, { timeoutSec: 900, timeoutExplicit: true })({ query: "q" });
     const args = f.runs[0].args;
     expect(args[args.indexOf("--print-timeout") + 1]).toBe("900s");
+  });
+
+  it("per-tool AGY_TIMEOUT_<TOOL> overrides only that tool", async () => {
+    const f = fakeDeps();
+    const cfg = { perToolTimeouts: { deep_search: 300 } };
+    await handlerFor("deep_search", f, cfg)({ query: "q" });
+    expect(f.runs[0].args[f.runs[0].args.indexOf("--print-timeout") + 1]).toBe("300s");
+    // a tool without an override keeps its default
+    await handlerFor("web_lookup", f, cfg)({ query: "q" });
+    const tool = TOOLS.find((t) => t.name === "web_lookup")!;
+    expect(f.runs[1].args[f.runs[1].args.indexOf("--print-timeout") + 1]).toBe(`${tool.timeoutSec}s`);
+  });
+
+  it("per-tool override wins over explicit global AGY_TIMEOUT", async () => {
+    const f = fakeDeps();
+    const cfg = { timeoutSec: 900, timeoutExplicit: true, perToolTimeouts: { deep_search: 300 } };
+    await handlerFor("deep_search", f, cfg)({ query: "q" });
+    expect(f.runs[0].args[f.runs[0].args.indexOf("--print-timeout") + 1]).toBe("300s");
   });
 
   it("fails over to the next chain model on quota exhaustion", async () => {

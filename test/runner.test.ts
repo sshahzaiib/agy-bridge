@@ -14,6 +14,7 @@ const cfg: Config = {
   agyPath: "agy",
   timeoutSec: 600,
   timeoutExplicit: false,
+  perToolTimeouts: {},
   maxOutputChars: 100,
   defaultModel: undefined,
   skipPermissions: true,

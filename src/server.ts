@@ -27,7 +27,9 @@ export function createToolHandler(
       const cwd = (args.cwd as string | undefined) ?? process.cwd();
       const conversationId = args.session_id as string | undefined;
       const prompt = tool.buildPrompt(args, cwd);
-      const timeoutSec = cfg.timeoutExplicit ? cfg.timeoutSec : tool.timeoutSec;
+      const timeoutSec =
+        cfg.perToolTimeouts[tool.name] ??
+        (cfg.timeoutExplicit ? cfg.timeoutSec : tool.timeoutSec);
 
       const resolution = conversationId
         ? { models: [undefined], note: undefined }

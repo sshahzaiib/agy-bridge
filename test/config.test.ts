@@ -8,6 +8,7 @@ describe("loadConfig", () => {
       agyPath: "agy",
       timeoutSec: 1200,
       timeoutExplicit: false,
+      perToolTimeouts: {},
       maxOutputChars: 50_000,
       defaultModel: undefined,
       skipPermissions: true,
@@ -39,6 +40,16 @@ describe("loadConfig", () => {
     expect(c.timeoutSec).toBe(1200);
     expect(c.timeoutExplicit).toBe(false);
     expect(c.maxOutputChars).toBe(50_000);
+  });
+
+  it("parses per-tool AGY_TIMEOUT_<TOOL> overrides", () => {
+    const c = loadConfig({ AGY_TIMEOUT_DEEP_SEARCH: "300", AGY_TIMEOUT_DELEGATE: "900" });
+    expect(c.perToolTimeouts).toEqual({ deep_search: 300, delegate: 900 });
+  });
+
+  it("ignores non-positive per-tool timeout values", () => {
+    const c = loadConfig({ AGY_TIMEOUT_DEEP_SEARCH: "abc", AGY_TIMEOUT_DELEGATE: "-5" });
+    expect(c.perToolTimeouts).toEqual({});
   });
 
   it("reads AGY_ON_FAILURE=strict", () => {

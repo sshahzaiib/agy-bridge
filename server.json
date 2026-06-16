@@ -6,12 +6,12 @@
     "url": "https://github.com/sshahzaiib/agy-bridge",
     "source": "github"
   },
-  "version": "0.3.1",
+  "version": "0.4.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "agy-bridge",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "transport": {
         "type": "stdio"
       },
@@ -24,7 +24,7 @@
           "name": "AGY_PATH"
         },
         {
-          "description": "Override the per-tool timeouts, in seconds",
+          "description": "Override all per-tool timeouts at once, in seconds (use AGY_TIMEOUT_<TOOL> to override a single tool)",
           "isRequired": false,
           "format": "number",
           "isSecret": false,

@@ -35,12 +35,22 @@ User → Claude Code → agy-bridge (MCP) → agy CLI → Gemini / Claude / GPT-
 ## Install
 
 ```bash
-# 1. Register the MCP server (user scope = all projects)
-claude mcp add -s user agy-bridge npx -- -y agy-bridge
+# 1. Register the MCP server (user scope = all projects).
+#    add-json bakes in a generous client-side timeout so long analyze_files /
+#    delegate calls don't trip Claude Code's tool-call deadline (see Timeouts).
+claude mcp add-json -s user agy-bridge \
+  '{"command":"npx","args":["-y","agy-bridge"],"timeout":600000}'
 
 # 2. Add delegation rules to your project (or ~/.claude/CLAUDE.md for global)
 curl -o CLAUDE.md https://raw.githubusercontent.com/sshahzaiib/agy-bridge/main/CLAUDE.md
 ```
+
+> The `"timeout": 600000` (10 min, milliseconds) is the **client-side** tool-call
+> deadline — without it, a cold-start `analyze_files` (~40–50s) or a long
+> `delegate` can hit Claude Code's default and return `timed out waiting for
+> response` while the agy run is still going. If your client doesn't honor a
+> per-server `timeout`, set the global env var `MCP_TOOL_TIMEOUT=600000` instead.
+> Details and the agy-side budgets are in [Timeouts and cancellation](#timeouts-and-cancellation).
 
 ## Tools
 
@@ -80,6 +90,10 @@ Failovers are annotated in the response footer (`failover: <model>: quota exhaus
 ### Timeouts and cancellation
 
 Each tool has its own default timeout sized to its job: `web_lookup` 120s, `deep_search` 180s, `analyze_files` / `adversarial_review` / `follow_up` 300s, `delegate` 600s. Setting `AGY_TIMEOUT` explicitly overrides all of them at once. To change a single tool, set `AGY_TIMEOUT_<TOOL_NAME>` instead (e.g. `AGY_TIMEOUT_DEEP_SEARCH=300`); a per-tool override takes precedence over the global `AGY_TIMEOUT` and the tool's default. The full set of per-tool variables is `AGY_TIMEOUT_ANALYZE_FILES`, `AGY_TIMEOUT_DEEP_SEARCH`, `AGY_TIMEOUT_WEB_LOOKUP`, `AGY_TIMEOUT_ADVERSARIAL_REVIEW`, `AGY_TIMEOUT_FOLLOW_UP`, and `AGY_TIMEOUT_DELEGATE`. The kill path escalates SIGTERM → SIGKILL across the whole process group, and the deadline fires even if agy's helper processes hold the output pipes open. Cancelling the tool call from the MCP client (e.g. pressing Esc in Claude Code) also kills the agy run instead of orphaning it.
+
+**Two timeout layers — align them.** The timeouts above are the *agy-side* budget. Your MCP client (Claude Code) has its own, separate *tool-call* timeout, and if it is shorter than the agy budget the client gives up first — you'll see `Error: timed out waiting for response` (note: agy-bridge's own timeout reads `agy timed out after Ns` instead). The work is not lost: the agy session persists, so `follow_up` with the returned `session_id` retrieves the result. But the real fix is to make the client wait at least as long as agy: the [Install](#install) command already sets a per-server `timeout` of 600000ms (scoped to the agy-bridge entry only). If you registered the server without it, re-run the `add-json` command from Install, or set the global env var `MCP_TOOL_TIMEOUT=600000`. Rule of thumb: **client `timeout` ≥ agy budget**.
+
+**Expected latency.** Most of the perceived "slowness" is cold start: the first call in a session spawns the agy CLI and warms the model. A simple `analyze_files` over 3 files measures around **40–50s cold** (≈46s observed), dropping on subsequent same-session calls. A first call that also hits a quota 429 takes longer while the bridge fails over. So a client timeout below ~60s will intermittently trip on cold starts even for "simple" questions — size it generously.
 
 ## Configuration
 

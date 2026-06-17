@@ -35,12 +35,22 @@ User → Claude Code → agy-bridge (MCP) → agy CLI → Gemini / Claude / GPT-
 ## Install
 
 ```bash
-# 1. Register the MCP server (user scope = all projects)
-claude mcp add -s user agy-bridge npx -- -y agy-bridge
+# 1. Register the MCP server (user scope = all projects).
+#    add-json bakes in a generous client-side timeout so long analyze_files /
+#    delegate calls don't trip Claude Code's tool-call deadline (see Timeouts).
+claude mcp add-json -s user agy-bridge \
+  '{"command":"npx","args":["-y","agy-bridge"],"timeout":600000}'
 
 # 2. Add delegation rules to your project (or ~/.claude/CLAUDE.md for global)
 curl -o CLAUDE.md https://raw.githubusercontent.com/sshahzaiib/agy-bridge/main/CLAUDE.md
 ```
+
+> The `"timeout": 600000` (10 min, milliseconds) is the **client-side** tool-call
+> deadline — without it, a cold-start `analyze_files` (~40–50s) or a long
+> `delegate` can hit Claude Code's default and return `timed out waiting for
+> response` while the agy run is still going. If your client doesn't honor a
+> per-server `timeout`, set the global env var `MCP_TOOL_TIMEOUT=600000` instead.
+> Details and the agy-side budgets are in [Timeouts and cancellation](#timeouts-and-cancellation).
 
 ## Tools
 

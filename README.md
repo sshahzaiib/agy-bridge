@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="agy-bridge — Claude Code delegates heavy tasks to the Antigravity CLI" width="100%">
+<img src="https://raw.githubusercontent.com/sshahzaiib/agy-bridge/main/assets/banner.svg" alt="agy-bridge — Claude Code delegates heavy tasks to the Antigravity CLI" width="100%">
 
 # agy-bridge
 

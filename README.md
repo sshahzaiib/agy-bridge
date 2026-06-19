@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-bridge
 
 [![CI](https://github.com/sshahzaiib/agy-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/sshahzaiib/agy-bridge/actions/workflows/ci.yml)
@@ -6,9 +8,21 @@
 [![node](https://img.shields.io/node/v/agy-bridge)](https://nodejs.org)
 [![license](https://img.shields.io/npm/l/agy-bridge)](LICENSE)
 
+[![Glama score](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge/badges/score.svg)](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge)
+
 An MCP bridge that lets **Claude Code delegate heavy tasks to the Antigravity CLI (`agy`)** — saving Claude's context window and tokens for what matters.
 
 Claude sends a task → the bridge routes it to the best available model via `agy` → only the answer comes back. Large files, deep git searches, and web lookups never touch Claude's context.
+
+**Listed on**
+
+[![Glama](https://img.shields.io/badge/Glama-agy--bridge-7c3aed)](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge)
+[![MCP Market](https://img.shields.io/badge/MCP%20Market-agy--bridge-0ea5e9)](https://mcpmarket.com/server/agy-bridge)
+[![PulseMCP](https://img.shields.io/badge/PulseMCP-agy--bridge-f43f5e)](https://www.pulsemcp.com/servers/sshahzaiib-agy-bridge)
+[![mcp.so](https://img.shields.io/badge/mcp.so-agy--bridge-22c55e)](https://mcp.so/server/agy-bridge/sshahzaiib)
+[![MCP Servers](https://img.shields.io/badge/MCP%20Servers-agy--bridge-f59e0b)](https://mcpservers.org/servers/sshahzaiib/agy-bridge)
+
+</div>
 
 ```
 User → Claude Code → agy-bridge (MCP) → agy CLI → Gemini / Claude / GPT-OSS

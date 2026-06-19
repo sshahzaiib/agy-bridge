@@ -1,54 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="agy-bridge — Claude Code delegates heavy tasks to the Antigravity CLI">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0d1117"/>
-      <stop offset="1" stop-color="#161229"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.6">
-      <stop offset="0" stop-color="#7c3aed" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#a78bfa"/>
-      <stop offset="0.55" stop-color="#8b5cf6"/>
-      <stop offset="1" stop-color="#22d3ee"/>
-    </linearGradient>
-    <linearGradient id="accentPill" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#6d28d9"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" width="1280" height="360" role="img" aria-label="agy-bridge — an MCP server that lets Claude Code delegate heavy tasks to the Antigravity CLI">
+  <rect width="1280" height="360" fill="#0f1116"/>
+  <!-- window -->
+  <rect x="80" y="44" width="1120" height="272" rx="12" fill="#15181f" stroke="#262b35"/>
+  <!-- title bar -->
+  <path d="M80 56 a12 12 0 0 1 12 -12 h1096 a12 12 0 0 1 12 12 v32 h-1120 z" fill="#1b1f27"/>
+  <circle cx="108" cy="68" r="5.5" fill="#3a3f4b"/>
+  <circle cx="128" cy="68" r="5.5" fill="#3a3f4b"/>
+  <circle cx="148" cy="68" r="5.5" fill="#3a3f4b"/>
+  <text x="640" y="73" text-anchor="middle" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="14" fill="#6b7280" letter-spacing="0.5">agy-bridge — delegation session</text>
+  <line x1="80" y1="88" x2="1200" y2="88" stroke="#262b35"/>
 
-  <rect width="1200" height="340" rx="16" fill="url(#bg)"/>
-  <rect width="1200" height="340" rx="16" fill="url(#glow)"/>
-  <rect x="0.5" y="0.5" width="1199" height="339" rx="16" fill="none" stroke="#30363d" stroke-opacity="0.7"/>
+  <g font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="19">
+    <text x="116" y="132"><tspan fill="#e0a83c">$</tspan><tspan fill="#9aa4b2"> claude</tspan></text>
 
-  <!-- hero -->
-  <text x="600" y="128" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace" font-size="92" font-weight="700" fill="url(#title)" letter-spacing="-2">agy-bridge</text>
-  <text x="600" y="178" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="25" fill="#c9d1d9">Claude Code delegates heavy tasks to the <tspan font-family="ui-monospace, monospace" fill="#a78bfa">agy</tspan> CLI — saving context &amp; tokens</text>
+    <text x="116" y="174"><tspan fill="#e0a83c">▸</tspan><tspan fill="#d7dde5"> delegate</tspan><tspan fill="#6b7280">  analyze 14 files · 4,200 lines</tspan></text>
+    <text x="116" y="204" fill="#7d8794">  ↳ routed → <tspan fill="#aeb6c2">Gemini 3.5 Flash (High)</tspan></text>
+    <text x="116" y="234" fill="#7d8794">  ↳ 46s · only the answer returns to Claude</text>
 
-  <!-- flow row, centered on x=600 -->
-  <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="20">
-    <!-- Claude Code -->
-    <rect x="255" y="228" width="160" height="44" rx="22" fill="#1c2230" stroke="#30363d"/>
-    <text x="335" y="251" text-anchor="middle" dominant-baseline="central" fill="#e6edf3">Claude Code</text>
-
-    <!-- arrow 1 -->
-    <line x1="420" y1="250" x2="452" y2="250" stroke="#8b949e" stroke-width="2"/>
-    <path d="M452 250 l-9 -5 v10 z" fill="#8b949e"/>
-
-    <!-- agy-bridge (accent) -->
-    <rect x="455" y="228" width="150" height="44" rx="22" fill="url(#accentPill)"/>
-    <text x="530" y="251" text-anchor="middle" dominant-baseline="central" fill="#ffffff" font-weight="700">agy-bridge</text>
-
-    <!-- arrow 2 -->
-    <line x1="610" y1="250" x2="642" y2="250" stroke="#8b949e" stroke-width="2"/>
-    <path d="M642 250 l-9 -5 v10 z" fill="#8b949e"/>
-
-    <!-- models -->
-    <rect x="645" y="228" width="300" height="44" rx="22" fill="#1c2230" stroke="#30363d"/>
-    <text x="795" y="251" text-anchor="middle" dominant-baseline="central" fill="#e6edf3">Gemini · Claude · GPT-OSS</text>
+    <text x="116" y="284" fill="#4b5563">[<tspan fill="#e0a83c">agy-bridge</tspan>] model: <tspan fill="#9aa4b2">Gemini 3.5 Flash</tspan> · session: <tspan fill="#9aa4b2">1f0c…d4</tspan></text>
   </g>
+  <!-- active cursor at the prompt -->
+  <rect x="223" y="118" width="11" height="19" fill="#e0a83c" opacity="0.85"/>
 
-  <text x="600" y="312" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#6e7681" letter-spacing="2">MODEL CONTEXT PROTOCOL · ANTIGRAVITY BRIDGE</text>
+  <text x="80" y="346" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="16" fill="#6b7280">An MCP server that keeps Claude Code's context for what matters — heavy work goes to <tspan font-family="ui-monospace,monospace" fill="#9aa4b2">agy</tspan>.</text>
 </svg>

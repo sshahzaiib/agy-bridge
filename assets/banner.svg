@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="agy-bridge — Claude Code delegates heavy tasks to the Antigravity CLI">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#161229"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#7c3aed" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a78bfa"/>
+      <stop offset="0.55" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="accentPill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="340" rx="16" fill="url(#bg)"/>
+  <rect width="1200" height="340" rx="16" fill="url(#glow)"/>
+  <rect x="0.5" y="0.5" width="1199" height="339" rx="16" fill="none" stroke="#30363d" stroke-opacity="0.7"/>
+
+  <!-- hero -->
+  <text x="600" y="128" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace" font-size="92" font-weight="700" fill="url(#title)" letter-spacing="-2">agy-bridge</text>
+  <text x="600" y="178" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="25" fill="#c9d1d9">Claude Code delegates heavy tasks to the <tspan font-family="ui-monospace, monospace" fill="#a78bfa">agy</tspan> CLI — saving context &amp; tokens</text>
+
+  <!-- flow row, centered on x=600 -->
+  <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="20">
+    <!-- Claude Code -->
+    <rect x="255" y="228" width="160" height="44" rx="22" fill="#1c2230" stroke="#30363d"/>
+    <text x="335" y="251" text-anchor="middle" dominant-baseline="central" fill="#e6edf3">Claude Code</text>
+
+    <!-- arrow 1 -->
+    <line x1="420" y1="250" x2="452" y2="250" stroke="#8b949e" stroke-width="2"/>
+    <path d="M452 250 l-9 -5 v10 z" fill="#8b949e"/>
+
+    <!-- agy-bridge (accent) -->
+    <rect x="455" y="228" width="150" height="44" rx="22" fill="url(#accentPill)"/>
+    <text x="530" y="251" text-anchor="middle" dominant-baseline="central" fill="#ffffff" font-weight="700">agy-bridge</text>
+
+    <!-- arrow 2 -->
+    <line x1="610" y1="250" x2="642" y2="250" stroke="#8b949e" stroke-width="2"/>
+    <path d="M642 250 l-9 -5 v10 z" fill="#8b949e"/>
+
+    <!-- models -->
+    <rect x="645" y="228" width="300" height="44" rx="22" fill="#1c2230" stroke="#30363d"/>
+    <text x="795" y="251" text-anchor="middle" dominant-baseline="central" fill="#e6edf3">Gemini · Claude · GPT-OSS</text>
+  </g>
+
+  <text x="600" y="312" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#6e7681" letter-spacing="2">MODEL CONTEXT PROTOCOL · ANTIGRAVITY BRIDGE</text>
+</svg>

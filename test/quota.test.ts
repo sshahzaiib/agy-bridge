@@ -9,7 +9,7 @@ import {
 } from "../src/quota.js";
 
 const LOG_429 =
-  'E0613 00:38:03.030151 56767 log.go:398] agent executor error: RESOURCE_EXHAUSTED (code 429): ' +
+  "E0613 00:38:03.030151 56767 log.go:398] agent executor error: RESOURCE_EXHAUSTED (code 429): " +
   "Individual quota reached. Contact your administrator to enable overages. Resets in 96h53m25s.: " +
   "RESOURCE_EXHAUSTED (code 429): Individual quota reached.";
 
@@ -55,7 +55,10 @@ describe("detectQuota", () => {
 
 describe("QuotaError", () => {
   it("carries model and reset info in the message", () => {
-    const e = new QuotaError("Gemini 3.5 Flash (Medium)", { resetText: "4h24m", resetSeconds: 15840 });
+    const e = new QuotaError("Gemini 3.5 Flash (Medium)", {
+      resetText: "4h24m",
+      resetSeconds: 15840,
+    });
     expect(e.message).toContain("Gemini 3.5 Flash (Medium)");
     expect(e.message).toContain("4h24m");
     expect(e.resetSeconds).toBe(15840);

@@ -220,12 +220,15 @@ export async function runAgy(
     // Hard deadline independent of the child's pipes: agy's own --print-timeout
     // should fire first; if it doesn't, reject without waiting for "close".
     timers.push(
-      setTimeout(() => {
-        killChild();
-        finish(() =>
-          reject(new Error(`agy timed out after ${timeoutSec}s (AGY_TIMEOUT to adjust).`)),
-        );
-      }, timeoutSec * 1000 + graceMs),
+      setTimeout(
+        () => {
+          killChild();
+          finish(() =>
+            reject(new Error(`agy timed out after ${timeoutSec}s (AGY_TIMEOUT to adjust).`)),
+          );
+        },
+        timeoutSec * 1000 + graceMs,
+      ),
     );
 
     const onAbort = () => {

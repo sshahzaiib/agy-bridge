@@ -81,11 +81,16 @@ describe("buildArgs", () => {
       ),
     ).toEqual([
       "--dangerously-skip-permissions",
-      "--add-dir", "/repo",
-      "--log-file", "/tmp/run.log",
-      "--model", "Gemini 3.1 Pro (High)",
-      "--print-timeout", "120s",
-      "-p", "hi",
+      "--add-dir",
+      "/repo",
+      "--log-file",
+      "/tmp/run.log",
+      "--model",
+      "Gemini 3.1 Pro (High)",
+      "--print-timeout",
+      "120s",
+      "-p",
+      "hi",
     ]);
   });
 
@@ -97,11 +102,16 @@ describe("buildArgs", () => {
     );
     expect(args).toEqual([
       "--sandbox",
-      "--add-dir", "/repo",
-      "--log-file", "/tmp/run.log",
-      "--conversation", "abc-123",
-      "--print-timeout", "600s",
-      "-p", "q",
+      "--add-dir",
+      "/repo",
+      "--log-file",
+      "/tmp/run.log",
+      "--conversation",
+      "abc-123",
+      "--print-timeout",
+      "600s",
+      "-p",
+      "q",
     ]);
   });
 });
@@ -195,9 +205,9 @@ describe("runAgy", () => {
     // quota line appears only when checked after exit
     let calls = 0;
     f.deps.readLog = async () => (++calls > 0 ? LOG_429 : "");
-    await expect(
-      runAgy({ prompt: "q", cwd: "/repo", model: "M" }, cfg, f.deps),
-    ).rejects.toThrow(QuotaError);
+    await expect(runAgy({ prompt: "q", cwd: "/repo", model: "M" }, cfg, f.deps)).rejects.toThrow(
+      QuotaError,
+    );
   });
 
   it("treats empty output with a clean log as an error, not success", async () => {

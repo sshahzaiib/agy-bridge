@@ -13,7 +13,9 @@ const commonShape = {
   cwd: z
     .string()
     .optional()
-    .describe("Absolute path to the working directory / project root. Defaults to the server's cwd."),
+    .describe(
+      "Absolute path to the working directory / project root. Defaults to the server's cwd.",
+    ),
   model: z
     .string()
     .optional()
@@ -104,7 +106,10 @@ export const TOOLS: ToolDef[] = [
       "ALWAYS use this for plan critiques, design reviews, and pre-merge code review: " +
       "it hunts for flaws, edge cases, security issues, and unstated assumptions you may have missed.",
     schema: {
-      content: z.string().optional().describe("Inline content to review (plan, diff, code snippet)."),
+      content: z
+        .string()
+        .optional()
+        .describe("Inline content to review (plan, diff, code snippet)."),
       files: z
         .array(z.string())
         .optional()

@@ -42,14 +42,20 @@ describe("prompt templates", () => {
   const get = (name: string) => TOOLS.find((t) => t.name === name)!;
 
   it("analyze_files lists absolute paths and the question", () => {
-    const p = get("analyze_files").buildPrompt({ files: ["x.log"], question: "find errors" }, "/repo");
+    const p = get("analyze_files").buildPrompt(
+      { files: ["x.log"], question: "find errors" },
+      "/repo",
+    );
     expect(p).toContain("/repo/x.log");
     expect(p).toContain("find errors");
     expect(p).toMatch(/file:line/);
   });
 
   it("adversarial_review accepts inline content", () => {
-    const p = get("adversarial_review").buildPrompt({ content: "plan text", focus: "security" }, "/repo");
+    const p = get("adversarial_review").buildPrompt(
+      { content: "plan text", focus: "security" },
+      "/repo",
+    );
     expect(p).toContain("plan text");
     expect(p).toContain("security");
     expect(p).toMatch(/severity/i);

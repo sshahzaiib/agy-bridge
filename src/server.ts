@@ -1,7 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadConfig, type Config } from "./config.js";
 import { ModelRegistry } from "./models.js";
-import { runAgy, defaultDeps, execWithClosedStdin, type RunnerDeps, type RunResult } from "./runner.js";
+import {
+  runAgy,
+  defaultDeps,
+  execWithClosedStdin,
+  type RunnerDeps,
+  type RunResult,
+} from "./runner.js";
 import { CooldownRegistry, QuotaError } from "./quota.js";
 import { TOOLS, type ToolDef } from "./tools.js";
 
@@ -28,8 +34,7 @@ export function createToolHandler(
       const conversationId = args.session_id as string | undefined;
       const prompt = tool.buildPrompt(args, cwd);
       const timeoutSec =
-        cfg.perToolTimeouts[tool.name] ??
-        (cfg.timeoutExplicit ? cfg.timeoutSec : tool.timeoutSec);
+        cfg.perToolTimeouts[tool.name] ?? (cfg.timeoutExplicit ? cfg.timeoutSec : tool.timeoutSec);
 
       const resolution = conversationId
         ? { models: [undefined], note: undefined }
@@ -82,7 +87,9 @@ export function createToolHandler(
       if (result.sessionId) meta.push(`session: ${result.sessionId} (use follow_up to continue)`);
 
       return {
-        content: [{ type: "text", text: `${result.output}\n\n---\n[agy-bridge] ${meta.join(" | ")}` }],
+        content: [
+          { type: "text", text: `${result.output}\n\n---\n[agy-bridge] ${meta.join(" | ")}` },
+        ],
       };
     } catch (err) {
       let text = (err as Error).message;

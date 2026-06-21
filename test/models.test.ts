@@ -35,9 +35,9 @@ describe("ModelRegistry.resolve", () => {
   });
 
   it("throws on explicit model not available, listing options", async () => {
-    await expect(
-      registry(LISTING).resolve({ explicit: "Nope", chain: [] }),
-    ).rejects.toThrow(/Gemini 3.5 Flash \(Medium\)/);
+    await expect(registry(LISTING).resolve({ explicit: "Nope", chain: [] })).rejects.toThrow(
+      /Gemini 3.5 Flash \(Medium\)/,
+    );
   });
 
   it("picks first available model in chain", async () => {

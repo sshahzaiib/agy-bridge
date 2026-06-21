@@ -119,7 +119,9 @@ describe("createToolHandler", () => {
     // a tool without an override keeps its default
     await handlerFor("web_lookup", f, cfg)({ query: "q" });
     const tool = TOOLS.find((t) => t.name === "web_lookup")!;
-    expect(f.runs[1].args[f.runs[1].args.indexOf("--print-timeout") + 1]).toBe(`${tool.timeoutSec}s`);
+    expect(f.runs[1].args[f.runs[1].args.indexOf("--print-timeout") + 1]).toBe(
+      `${tool.timeoutSec}s`,
+    );
   });
 
   it("per-tool override wins over explicit global AGY_TIMEOUT", async () => {

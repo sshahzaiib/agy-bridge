@@ -20,7 +20,8 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
   },
   "keywords": [
     "mcp",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "husky": "^9.1.7",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
     "vitest": "^3.0.0"

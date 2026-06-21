@@ -1,0 +1,6 @@
+branch="$(git branch --show-current)"
+if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+  echo "✋ Direct commits to '$branch' are blocked. Branch off and open a PR."
+  echo "   Override (rare): git commit --no-verify"
+  exit 1
+fi

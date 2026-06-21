@@ -65,14 +65,24 @@ export class ModelRegistry {
     }
 
     if (available === null) {
-      return { models: [undefined], note: "could not list agy models; using agy's own default model" };
+      return {
+        models: [undefined],
+        note: "could not list agy models; using agy's own default model",
+      };
     }
     const models = opts.chain.filter((m) => available.includes(m));
-    if (opts.defaultModel && available.includes(opts.defaultModel) && !models.includes(opts.defaultModel)) {
+    if (
+      opts.defaultModel &&
+      available.includes(opts.defaultModel) &&
+      !models.includes(opts.defaultModel)
+    ) {
       models.push(opts.defaultModel);
     }
     if (models.length === 0) {
-      return { models: [undefined], note: "no preferred model available; using agy's own default model" };
+      return {
+        models: [undefined],
+        note: "no preferred model available; using agy's own default model",
+      };
     }
     return { models };
   }

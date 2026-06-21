@@ -33,14 +33,14 @@ User → Claude Code → agy-bridge (MCP) → agy CLI → Gemini / Claude / GPT-
 
 ## Why this over claude-to-agy?
 
-| | claude-to-agy | **agy-bridge** |
-|---|---|---|
-| Tool surface | 1 generic `delegate_to_agy` | 6 purpose-built tools — Claude self-routes reliably |
-| Model selection | none (agy default only) | per-tool routing across all `agy models`, with availability detection and fallback |
-| Multi-turn | stateless | session continuity — `follow_up` resumes agy conversations without resending context |
-| Output safety | unbounded | configurable truncation cap protects Claude's context |
-| Sandbox | no | optional `--sandbox` mode |
-| Install | uvx (Python) | npx (Node) — zero install |
+|                 | claude-to-agy               | **agy-bridge**                                                                       |
+| --------------- | --------------------------- | ------------------------------------------------------------------------------------ |
+| Tool surface    | 1 generic `delegate_to_agy` | 6 purpose-built tools — Claude self-routes reliably                                  |
+| Model selection | none (agy default only)     | per-tool routing across all `agy models`, with availability detection and fallback   |
+| Multi-turn      | stateless                   | session continuity — `follow_up` resumes agy conversations without resending context |
+| Output safety   | unbounded                   | configurable truncation cap protects Claude's context                                |
+| Sandbox         | no                          | optional `--sandbox` mode                                                            |
+| Install         | uvx (Python)                | npx (Node) — zero install                                                            |
 
 ## Requirements
 
@@ -64,20 +64,20 @@ curl -o CLAUDE.md https://raw.githubusercontent.com/sshahzaiib/agy-bridge/main/C
 > The `"timeout": 600000` (10 min, milliseconds) is the **client-side** tool-call
 > deadline — without it, a cold-start `analyze_files` (~40–50s) or a long
 > `delegate` can hit Claude Code's default and return `timed out waiting for
-> response` while the agy run is still going. If your client doesn't honor a
+response` while the agy run is still going. If your client doesn't honor a
 > per-server `timeout`, set the global env var `MCP_TOOL_TIMEOUT=600000` instead.
 > Details and the agy-side budgets are in [Timeouts and cancellation](#timeouts-and-cancellation).
 
 ## Tools
 
-| Tool | Use for | Model routing (first available) |
-|---|---|---|
-| `analyze_files` | Files >200 lines, >3 files at once, logs, dumps, generated code | Gemini 3.5 Flash (High) → Gemini 3.1 Pro (Low) |
-| `deep_search` | git log/diff/blame archaeology, repo-wide greps | Gemini 3.5 Flash (Medium) → (High) |
-| `web_lookup` | Docs, API references, external/current knowledge | Gemini 3.5 Flash (Medium) → (High) |
-| `adversarial_review` | Plan critiques, design and code reviews | Gemini 3.1 Pro (High) → Claude Opus 4.6 (Thinking) → Flash (High) |
-| `follow_up` | Continue a prior session by `session_id` — no context resend | inherits the session |
-| `delegate` | Anything else heavy | Gemini 3.5 Flash (High) |
+| Tool                 | Use for                                                         | Model routing (first available)                                   |
+| -------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `analyze_files`      | Files >200 lines, >3 files at once, logs, dumps, generated code | Gemini 3.5 Flash (High) → Gemini 3.1 Pro (Low)                    |
+| `deep_search`        | git log/diff/blame archaeology, repo-wide greps                 | Gemini 3.5 Flash (Medium) → (High)                                |
+| `web_lookup`         | Docs, API references, external/current knowledge                | Gemini 3.5 Flash (Medium) → (High)                                |
+| `adversarial_review` | Plan critiques, design and code reviews                         | Gemini 3.1 Pro (High) → Claude Opus 4.6 (Thinking) → Flash (High) |
+| `follow_up`          | Continue a prior session by `session_id` — no context resend    | inherits the session                                              |
+| `delegate`           | Anything else heavy                                             | Gemini 3.5 Flash (High)                                           |
 
 All tools accept optional `cwd` (project root) and `model` (exact name from `agy models`; validated, with available models listed on mismatch).
 
@@ -107,7 +107,7 @@ Failovers are annotated in the response footer (`failover: <model>: quota exhaus
 
 Each tool has its own default timeout sized to its job: `web_lookup` 120s, `deep_search` 180s, `analyze_files` / `adversarial_review` / `follow_up` 300s, `delegate` 600s. Setting `AGY_TIMEOUT` explicitly overrides all of them at once. To change a single tool, set `AGY_TIMEOUT_<TOOL_NAME>` instead (e.g. `AGY_TIMEOUT_DEEP_SEARCH=300`); a per-tool override takes precedence over the global `AGY_TIMEOUT` and the tool's default. The full set of per-tool variables is `AGY_TIMEOUT_ANALYZE_FILES`, `AGY_TIMEOUT_DEEP_SEARCH`, `AGY_TIMEOUT_WEB_LOOKUP`, `AGY_TIMEOUT_ADVERSARIAL_REVIEW`, `AGY_TIMEOUT_FOLLOW_UP`, and `AGY_TIMEOUT_DELEGATE`. The kill path escalates SIGTERM → SIGKILL across the whole process group, and the deadline fires even if agy's helper processes hold the output pipes open. Cancelling the tool call from the MCP client (e.g. pressing Esc in Claude Code) also kills the agy run instead of orphaning it.
 
-**Two timeout layers — align them.** The timeouts above are the *agy-side* budget. Your MCP client (Claude Code) has its own, separate *tool-call* timeout, and if it is shorter than the agy budget the client gives up first — you'll see `Error: timed out waiting for response` (note: agy-bridge's own timeout reads `agy timed out after Ns` instead). The work is not lost: the agy session persists, so `follow_up` with the returned `session_id` retrieves the result. But the real fix is to make the client wait at least as long as agy: the [Install](#install) command already sets a per-server `timeout` of 600000ms (scoped to the agy-bridge entry only). If you registered the server without it, re-run the `add-json` command from Install, or set the global env var `MCP_TOOL_TIMEOUT=600000`. Rule of thumb: **client `timeout` ≥ agy budget**.
+**Two timeout layers — align them.** The timeouts above are the _agy-side_ budget. Your MCP client (Claude Code) has its own, separate _tool-call_ timeout, and if it is shorter than the agy budget the client gives up first — you'll see `Error: timed out waiting for response` (note: agy-bridge's own timeout reads `agy timed out after Ns` instead). The work is not lost: the agy session persists, so `follow_up` with the returned `session_id` retrieves the result. But the real fix is to make the client wait at least as long as agy: the [Install](#install) command already sets a per-server `timeout` of 600000ms (scoped to the agy-bridge entry only). If you registered the server without it, re-run the `add-json` command from Install, or set the global env var `MCP_TOOL_TIMEOUT=600000`. Rule of thumb: **client `timeout` ≥ agy budget**.
 
 **Expected latency.** Most of the perceived "slowness" is cold start: the first call in a session spawns the agy CLI and warms the model. A simple `analyze_files` over 3 files measures around **40–50s cold** (≈46s observed), dropping on subsequent same-session calls. A first call that also hits a quota 429 takes longer while the bridge fails over. So a client timeout below ~60s will intermittently trip on cold starts even for "simple" questions — size it generously.
 
@@ -115,16 +115,16 @@ Each tool has its own default timeout sized to its job: `web_lookup` 120s, `deep
 
 All optional, via environment variables:
 
-| Variable | Default | Description |
-|---|---|---|
-| `AGY_PATH` | `agy` | Path to the agy binary |
-| `AGY_TIMEOUT` | per-tool | Seconds; overrides all per-tool timeouts at once (see above), passed as `--print-timeout`, enforced with a 15s kill grace |
-| `AGY_TIMEOUT_<TOOL>` | per-tool | Seconds; overrides the timeout for a single tool only, e.g. `AGY_TIMEOUT_DEEP_SEARCH=300`. Wins over `AGY_TIMEOUT` |
-| `AGY_MAX_OUTPUT_CHARS` | `50000` | Truncation cap for tool output |
-| `AGY_DEFAULT_MODEL` | unset | Fallback model when no chain entry is available |
-| `AGY_SKIP_PERMISSIONS` | `true` | Pass `--dangerously-skip-permissions` to agy |
-| `AGY_SANDBOX` | `false` | Run agy with `--sandbox` |
-| `AGY_ON_FAILURE` | `fallback` | `strict` appends an instruction to failed-tool errors telling the calling agent not to absorb the work itself |
+| Variable               | Default    | Description                                                                                                               |
+| ---------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `AGY_PATH`             | `agy`      | Path to the agy binary                                                                                                    |
+| `AGY_TIMEOUT`          | per-tool   | Seconds; overrides all per-tool timeouts at once (see above), passed as `--print-timeout`, enforced with a 15s kill grace |
+| `AGY_TIMEOUT_<TOOL>`   | per-tool   | Seconds; overrides the timeout for a single tool only, e.g. `AGY_TIMEOUT_DEEP_SEARCH=300`. Wins over `AGY_TIMEOUT`        |
+| `AGY_MAX_OUTPUT_CHARS` | `50000`    | Truncation cap for tool output                                                                                            |
+| `AGY_DEFAULT_MODEL`    | unset      | Fallback model when no chain entry is available                                                                           |
+| `AGY_SKIP_PERMISSIONS` | `true`     | Pass `--dangerously-skip-permissions` to agy                                                                              |
+| `AGY_SANDBOX`          | `false`    | Run agy with `--sandbox`                                                                                                  |
+| `AGY_ON_FAILURE`       | `fallback` | `strict` appends an instruction to failed-tool errors telling the calling agent not to absorb the work itself             |
 
 ### Failure behavior
 

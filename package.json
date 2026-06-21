@@ -20,7 +20,10 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "keywords": [
     "mcp",
@@ -41,9 +44,17 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
     "@types/node": "^20.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.8.4",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
     "vitest": "^3.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,js,json,md,yml,yaml}": "prettier --write"
   }
 }

@@ -21,7 +21,7 @@ CLIs backed by the same Gemini models (and typically the same account/quota).
 Delegating from Gemini CLI through agy-bridge routes Gemini work to Gemini
 through an extra hop:
 
-- No second model family for `adversarial_review` (agy *can* route reviews to
+- No second model family for `adversarial_review` (agy _can_ route reviews to
   Claude Opus, but a Gemini CLI user has that in agy directly).
 - Context offloading is a weak argument when the user could run agy as their
   primary CLI instead.

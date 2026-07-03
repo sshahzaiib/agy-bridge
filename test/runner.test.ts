@@ -1,11 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import path from "node:path";
 import {
   buildArgs,
   truncate,
   runAgy,
   execWithClosedStdin,
+  treeKill,
   type ChildHandle,
   type RunnerDeps,
+  type TreeKillExecFn,
 } from "../src/runner.js";
 import { QuotaError } from "../src/quota.js";
 import type { Config } from "../src/config.js";
@@ -61,7 +64,9 @@ function fakeDeps(opts: FakeOpts = {}) {
     removeLog: async (p) => {
       removed.push(p);
     },
-    readSessionsFile: async () => JSON.stringify({ "/repo": "sess-42" }),
+    // runAgy resolves the session-map key with path.resolve(cwd); mirror that
+    // here so the fixture matches on both POSIX (/repo) and Windows (C:\repo).
+    readSessionsFile: async () => JSON.stringify({ [path.resolve("/repo")]: "sess-42" }),
     makeLogPath: () => "/tmp/agy-bridge-test.log",
     pollMs: 5,
     graceMs: 20,
@@ -130,12 +135,66 @@ describe("truncate", () => {
 
 describe("execWithClosedStdin", () => {
   it("closes child stdin so stdin-reading commands exit instead of hanging", async () => {
-    const r = await execWithClosedStdin("cat", [], {
-      cwd: process.cwd(),
-      timeout: 5000,
-      maxBuffer: 1024,
-    });
+    // `cat` is absent on Windows (ENOENT). Use node (always present under
+    // vitest) reading stdin until EOF — execWithClosedStdin ends stdin at
+    // once, so this echoes "" and exits 0 instead of hanging.
+    const r = await execWithClosedStdin(
+      process.execPath,
+      [
+        "-e",
+        "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{" +
+          "process.stdout.write(d);process.exit(0)})",
+      ],
+      { cwd: process.cwd(), timeout: 5000, maxBuffer: 1024 },
+    );
     expect(r.stdout).toBe("");
+  });
+});
+
+describe("treeKill", () => {
+  it("Windows branch invokes taskkill with /PID <pid> /T /F", async () => {
+    const calls: { file: string; args: string[] }[] = [];
+    const exec: TreeKillExecFn = async (file, args) => {
+      calls.push({ file, args });
+      return { stdout: "", stderr: "" };
+    };
+    await treeKill(4321, "SIGTERM", exec, "win32");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].file).toBe("taskkill");
+    expect(calls[0].args).toEqual(["/PID", "4321", "/T", "/F"]);
+  });
+
+  it("Windows branch swallows a taskkill failure (process already gone)", async () => {
+    const exec: TreeKillExecFn = async () => {
+      throw new Error("not running");
+    };
+    await expect(treeKill(4321, "SIGTERM", exec, "win32")).resolves.toBeUndefined();
+  });
+
+  it("POSIX branch kills the whole process group via process.kill(-pid, signal)", async () => {
+    const killSpy = vi.spyOn(process, "kill").mockImplementation(() => true);
+    const exec: TreeKillExecFn = async () => {
+      throw new Error("exec must NOT be called on POSIX");
+    };
+    await treeKill(1234, "SIGTERM", exec, "linux");
+    expect(killSpy).toHaveBeenCalledWith(-1234, "SIGTERM");
+    killSpy.mockRestore();
+  });
+
+  it("POSIX branch falls back to child-only kill when the group is gone", async () => {
+    let first = true;
+    const killSpy = vi.spyOn(process, "kill").mockImplementation(() => {
+      if (first) {
+        first = false;
+        throw new Error("ESRCH");
+      }
+      return true;
+    });
+    await treeKill(1234, "SIGTERM", async () => ({ stdout: "", stderr: "" }), "linux");
+    expect(killSpy).toHaveBeenCalledTimes(2);
+    expect(killSpy).toHaveBeenNthCalledWith(1, -1234, "SIGTERM");
+    expect(killSpy).toHaveBeenNthCalledWith(2, 1234, "SIGTERM");
+    killSpy.mockRestore();
   });
 });
 

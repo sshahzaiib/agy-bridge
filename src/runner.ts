@@ -73,6 +73,52 @@ export const execWithClosedStdin: ExecFn = (file, args, options) => {
 const MAX_STDOUT_CHARS = 64 * 1024 * 1024;
 const MAX_STDERR_CHARS = 1024 * 1024;
 
+/**
+ * Subprocess executor used by treeKill (taskkill on Windows). Injectable so the
+ * kill path is unit-testable without spawning real processes.
+ */
+export type TreeKillExecFn = (
+  file: string,
+  args: string[],
+) => Promise<{ stdout: string; stderr: string }>;
+
+export const defaultTreeKillExec: TreeKillExecFn = (file, args) =>
+  execFileAsync(file, args, { timeout: 10_000, maxBuffer: 64 * 1024 });
+
+/**
+ * Cross-platform process-tree kill. Replaces the Windows-broken
+ * `process.kill(-pid)` (Node throws on negative pids under win32, orphaning
+ * grandchildren like web-search helpers). Windows has no signal semantics for
+ * a process group, so it always force-kills the tree via `taskkill /T /F`;
+ * POSIX stays signal-aware via the negative-pid group kill, falling back to a
+ * child-only kill if the group is already gone. Both branches are no-ops once
+ * the target has exited.
+ */
+export async function treeKill(
+  pid: number,
+  signal: NodeJS.Signals = "SIGTERM",
+  exec: TreeKillExecFn = defaultTreeKillExec,
+  platform: NodeJS.Platform = process.platform,
+): Promise<void> {
+  if (platform === "win32") {
+    try {
+      await exec("taskkill", ["/PID", String(pid), "/T", "/F"]);
+    } catch {
+      // process tree already gone — nothing to do
+    }
+    return;
+  }
+  try {
+    process.kill(-pid, signal); // whole process group
+  } catch {
+    try {
+      process.kill(pid, signal); // group leader already reaped — child only
+    } catch {
+      // already gone
+    }
+  }
+}
+
 function spawnDetached(file: string, args: string[], cwd: string): ChildHandle {
   // detached gives POSIX a process group to kill; on Windows it maps to
   // DETACHED_PROCESS, which makes agy and its MCP children pop console windows (#20).
@@ -121,17 +167,10 @@ function spawnDetached(file: string, args: string[], cwd: string): ChildHandle {
     wait: () => done,
     kill: (signal) => {
       // No-op once the child exited: its (negative) PID may already belong to
-      // an unrelated process group.
+      // an unrelated process group. treeKill is fire-and-forget here to keep
+      // the synchronous `void` contract.
       if (exited || child.pid === undefined) return;
-      try {
-        process.kill(-child.pid, signal); // whole process group
-      } catch {
-        try {
-          child.kill(signal);
-        } catch {
-          // already gone
-        }
-      }
+      void treeKill(child.pid, signal).catch(() => {});
     },
   };
 }

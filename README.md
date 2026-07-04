@@ -11,7 +11,6 @@
 [![license](https://img.shields.io/npm/l/agy-bridge)](LICENSE)
 
 [![Glama score](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge/badges/score.svg)](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge)
-[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/2f439062-d211-4a6c-b41b-3a603f490a32)
 
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sshahzaiib-agy-bridge-badge.png)](https://mseep.ai/app/sshahzaiib-agy-bridge)
 
@@ -26,6 +25,7 @@ Claude sends a task → the bridge routes it to the best available model via `ag
 [![PulseMCP](https://img.shields.io/badge/PulseMCP-agy--bridge-f43f5e)](https://www.pulsemcp.com/servers/sshahzaiib-agy-bridge)
 [![mcp.so](https://img.shields.io/badge/mcp.so-agy--bridge-22c55e)](https://mcp.so/server/agy-bridge/sshahzaiib)
 [![MCP Servers](https://img.shields.io/badge/MCP%20Servers-agy--bridge-f59e0b)](https://mcpservers.org/servers/sshahzaiib/agy-bridge)
+[![Verified on MseeP](https://img.shields.io/badge/MseeP.ai-verified-2563eb)](https://mseep.ai/app/2f439062-d211-4a6c-b41b-3a603f490a32)
 
 </div>
 

@@ -11,9 +11,9 @@
 [![license](https://img.shields.io/npm/l/agy-bridge)](LICENSE)
 
 [![Glama score](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge/badges/score.svg)](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge)
+[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/2f439062-d211-4a6c-b41b-3a603f490a32)
 
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sshahzaiib-agy-bridge-badge.png)](https://mseep.ai/app/sshahzaiib-agy-bridge)
-[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/2f439062-d211-4a6c-b41b-3a603f490a32)
 
 An MCP bridge that lets **Claude Code delegate heavy tasks to the Antigravity CLI (`agy`)** — saving Claude's context window and tokens for what matters.
 

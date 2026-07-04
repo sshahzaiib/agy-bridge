@@ -12,6 +12,8 @@
 
 [![Glama score](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge/badges/score.svg)](https://glama.ai/mcp/servers/sshahzaiib/agy-bridge)
 
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sshahzaiib-agy-bridge-badge.png)](https://mseep.ai/app/sshahzaiib-agy-bridge)
+
 An MCP bridge that lets **Claude Code delegate heavy tasks to the Antigravity CLI (`agy`)** — saving Claude's context window and tokens for what matters.
 
 Claude sends a task → the bridge routes it to the best available model via `agy` → only the answer comes back. Large files, deep git searches, and web lookups never touch Claude's context.

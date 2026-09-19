@@ -1,8 +1,33 @@
-export function parseModels(output: string): string[] {
-  return output
+export interface ModelEntry {
+  /** Machine id, e.g. `gemini-3.7-flash-medium` (agy ≥1.1 only). */
+  id?: string;
+  /** Display name, e.g. `Gemini 3.7 Flash (Medium)` — what `agy --model` accepts on every version. */
+  name: string;
+}
+
+/**
+ * Parses `agy models` output. Handles both the legacy one-column format (one
+ * display name per line) and the agy ≥1.1 two-column `<id>\t<display name>`
+ * format, which also emits a `Fetching available models...` status line.
+ */
+export function parseModelEntries(output: string): ModelEntry[] {
+  const lines = output
     .split("\n")
     .map((l) => l.trim().replace(/\s*\(current\)$/, ""))
     .filter((l) => l.length > 0);
+  // ponytail: in two-column mode only tabbed lines are models; anything else is status chatter.
+  const tabbed = lines.some((l) => l.includes("\t"));
+  return lines
+    .filter((l) => !tabbed || l.includes("\t"))
+    .map((l) => {
+      const [first, ...rest] = l.split("\t");
+      return rest.length > 0 ? { id: first.trim(), name: rest.join(" ").trim() } : { name: first };
+    });
+}
+
+/** Display names only — the values valid for `agy --model`. */
+export function parseModels(output: string): string[] {
+  return parseModelEntries(output).map((e) => e.name);
 }
 
 export interface ResolveOptions {
@@ -22,21 +47,26 @@ export interface ChainResolution {
 }
 
 export class ModelRegistry {
-  private listing: string[] | null = null;
-  private pending: Promise<string[] | null> | null = null;
+  private entries: ModelEntry[] | null = null;
+  private pending: Promise<ModelEntry[] | null> | null = null;
 
   constructor(private fetchListing: () => Promise<string>) {}
 
-  async available(): Promise<string[] | null> {
-    if (this.listing) return this.listing;
+  private async load(): Promise<ModelEntry[] | null> {
+    if (this.entries) return this.entries;
     // Cache the promise so concurrent first calls share one fetch.
     this.pending ??= this.fetchListing()
-      .then(parseModels)
+      .then(parseModelEntries)
       .catch(() => null);
     const result = await this.pending;
-    if (result) this.listing = result;
+    if (result) this.entries = result;
     else this.pending = null; // transient failure — retry on the next call
     return result;
+  }
+
+  /** Available display names, or null when `agy models` could not be read. */
+  async available(): Promise<string[] | null> {
+    return (await this.load())?.map((e) => e.name) ?? null;
   }
 
   async resolve(opts: ResolveOptions): Promise<Resolution> {
@@ -47,9 +77,13 @@ export class ModelRegistry {
   /**
    * Returns every viable model in preference order so callers can fail over
    * (e.g. on quota exhaustion). `[undefined]` means "let agy pick".
+   * Caller-supplied names (`explicit`, `defaultModel`) may be either the id or
+   * the display name; both are normalised to the display name.
    */
   async resolveChain(opts: ResolveOptions): Promise<ChainResolution> {
-    const available = await this.available();
+    const entries = await this.load();
+    const available = entries?.map((e) => e.name) ?? null;
+    const canonical = (m: string) => entries?.find((e) => e.id === m)?.name ?? m;
 
     if (opts.explicit) {
       if (available === null) {
@@ -58,7 +92,8 @@ export class ModelRegistry {
           note: "could not list agy models; passing model through unvalidated",
         };
       }
-      if (available.includes(opts.explicit)) return { models: [opts.explicit] };
+      const explicit = canonical(opts.explicit);
+      if (available.includes(explicit)) return { models: [explicit] };
       throw new Error(
         `Model "${opts.explicit}" is not available. Available models:\n${available.join("\n")}`,
       );
@@ -71,12 +106,9 @@ export class ModelRegistry {
       };
     }
     const models = opts.chain.filter((m) => available.includes(m));
-    if (
-      opts.defaultModel &&
-      available.includes(opts.defaultModel) &&
-      !models.includes(opts.defaultModel)
-    ) {
-      models.push(opts.defaultModel);
+    const defaultModel = opts.defaultModel && canonical(opts.defaultModel);
+    if (defaultModel && available.includes(defaultModel) && !models.includes(defaultModel)) {
+      models.push(defaultModel);
     }
     if (models.length === 0) {
       return {

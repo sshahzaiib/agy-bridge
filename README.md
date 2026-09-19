@@ -82,7 +82,7 @@ response` while the agy run is still going. If your client doesn't honor a
 | `follow_up`          | Continue a prior session by `session_id` — no context resend    | inherits the session                                              |
 | `delegate`           | Anything else heavy                                             | Gemini 3.5 Flash (High)                                           |
 
-All tools accept optional `cwd` (project root) and `model` (exact name from `agy models`; validated, with available models listed on mismatch).
+All tools accept optional `cwd` (project root) and `model` (an id or display name from `agy models`; validated, with available models listed on mismatch).
 
 Every response ends with a footer:
 

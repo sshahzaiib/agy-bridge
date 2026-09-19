@@ -1,9 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { parseModels, ModelRegistry } from "../src/models.js";
+import { parseModels, parseModelEntries, ModelRegistry } from "../src/models.js";
 
 const LISTING = `Gemini 3.5 Flash (Medium)
 Gemini 3.5 Flash (High)
 Gemini 3.1 Pro (High)
+`;
+
+const TABBED = `Fetching available models...
+gemini-3.7-flash-medium\tGemini 3.7 Flash (Medium)
+gemini-3.1-pro-high\tGemini 3.1 Pro (High)
 `;
 
 describe("parseModels", () => {
@@ -20,6 +25,15 @@ describe("parseModels", () => {
       "Claude Opus 4.6 (Thinking)",
     ]);
   });
+
+  // agy CLI ≥1.1 (issue #14): status line + `<id>\t<display name>` columns.
+  it("handles the two-column format, dropping the status line", () => {
+    expect(parseModelEntries(TABBED)).toEqual([
+      { id: "gemini-3.7-flash-medium", name: "Gemini 3.7 Flash (Medium)" },
+      { id: "gemini-3.1-pro-high", name: "Gemini 3.1 Pro (High)" },
+    ]);
+    expect(parseModels(TABBED)).toEqual(["Gemini 3.7 Flash (Medium)", "Gemini 3.1 Pro (High)"]);
+  });
 });
 
 describe("ModelRegistry.resolve", () => {
@@ -32,6 +46,18 @@ describe("ModelRegistry.resolve", () => {
   it("uses explicit model when available", async () => {
     const r = await registry(LISTING).resolve({ explicit: "Gemini 3.1 Pro (High)", chain: [] });
     expect(r.model).toBe("Gemini 3.1 Pro (High)");
+  });
+
+  it("accepts the model id as explicit or defaultModel and normalises to the display name", async () => {
+    const a = await registry(TABBED).resolve({ explicit: "gemini-3.1-pro-high", chain: [] });
+    expect(a.model).toBe("Gemini 3.1 Pro (High)");
+    const b = await registry(TABBED).resolve({
+      chain: ["X"],
+      defaultModel: "gemini-3.7-flash-medium",
+    });
+    expect(b.model).toBe("Gemini 3.7 Flash (Medium)");
+    const c = await registry(TABBED).resolve({ chain: ["Gemini 3.1 Pro (High)"] });
+    expect(c.model).toBe("Gemini 3.1 Pro (High)");
   });
 
   it("throws on explicit model not available, listing options", async () => {

@@ -29,6 +29,8 @@ export interface RunResult {
 export interface ChildHandle {
   stdout(): string;
   stderr(): string;
+  /** The spawned process pid (undefined before spawn / on spawn error). */
+  pid(): number | undefined;
   /** Settles when the process is fully done (exit + closed pipes, or spawn error). */
   wait(): Promise<{ code: number | null; error?: NodeJS.ErrnoException }>;
   /** Signals the whole process group so web-search helpers can't outlive agy. */
@@ -73,6 +75,69 @@ export const execWithClosedStdin: ExecFn = (file, args, options) => {
 const MAX_STDOUT_CHARS = 64 * 1024 * 1024;
 const MAX_STDERR_CHARS = 1024 * 1024;
 
+/**
+ * Subprocess executor used by treeKill (taskkill on Windows). Injectable so the
+ * kill path is unit-testable without spawning real processes.
+ */
+export type TreeKillExecFn = (
+  file: string,
+  args: string[],
+) => Promise<{ stdout: string; stderr: string }>;
+
+export const defaultTreeKillExec: TreeKillExecFn = (file, args) =>
+  execFileAsync(file, args, { timeout: 10_000, maxBuffer: 64 * 1024 });
+
+/**
+ * Cross-platform process-tree kill. Replaces the Windows-broken
+ * `process.kill(-pid)` (Node throws on negative pids under win32, orphaning
+ * grandchildren like web-search helpers). Windows has no signal semantics for
+ * a process group, so it always force-kills the tree via `taskkill /T /F`;
+ * POSIX stays signal-aware via the negative-pid group kill, falling back to a
+ * child-only kill if the group is already gone. Both branches are no-ops once
+ * the target has exited.
+ */
+export async function treeKill(
+  pid: number,
+  signal: NodeJS.Signals = "SIGTERM",
+  exec: TreeKillExecFn = defaultTreeKillExec,
+  platform: NodeJS.Platform = process.platform,
+): Promise<void> {
+  if (platform === "win32") {
+    try {
+      await exec("taskkill", ["/PID", String(pid), "/T", "/F"]);
+    } catch {
+      // process tree already gone — nothing to do
+    }
+    return;
+  }
+  try {
+    process.kill(-pid, signal); // whole process group
+  } catch {
+    try {
+      process.kill(pid, signal); // group leader already reaped — child only
+    } catch {
+      // already gone
+    }
+  }
+}
+
+/**
+ * Liveness probe (signal 0): true when `pid` is still running. On POSIX and
+ * Windows alike, `process.kill(pid, 0)` throws ESRCH when the pid is dead and
+ * EPERM when it exists but is owned by another user — EPERM counts as alive.
+ * Injectable so the orphan scan is unit-testable with a deterministic stub.
+ */
+export type PidProbe = (pid: number) => boolean;
+
+export const defaultPidProbe: PidProbe = (pid) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return (e as NodeJS.ErrnoException).code === "EPERM";
+  }
+};
+
 function spawnDetached(file: string, args: string[], cwd: string): ChildHandle {
   const child = spawn(file, args, { cwd, detached: true });
   child.stdin?.end();
@@ -112,20 +177,15 @@ function spawnDetached(file: string, args: string[], cwd: string): ChildHandle {
   return {
     stdout: () => out,
     stderr: () => err,
+    pid: () => child.pid,
     wait: () => done,
     kill: (signal) => {
       // No-op once the child exited: its (negative) PID may already belong to
-      // an unrelated process group.
+      // an unrelated process group. treeKill is fire-and-forget here to keep
+      // the synchronous `void` contract; callers that need to await the kill
+      // (e.g. job cancellation) call `treeKill` directly.
       if (exited || child.pid === undefined) return;
-      try {
-        process.kill(-child.pid, signal); // whole process group
-      } catch {
-        try {
-          child.kill(signal);
-        } catch {
-          // already gone
-        }
-      }
+      void treeKill(child.pid, signal).catch(() => {});
     },
   };
 }

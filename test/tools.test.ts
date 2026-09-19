@@ -1,16 +1,25 @@
 import { describe, it, expect } from "vitest";
-import { TOOLS, resolveFiles } from "../src/tools.js";
+import path from "node:path";
+import { TOOLS, resolveFiles, SESSION_TRANSFER_TOOL } from "../src/tools.js";
 
 describe("TOOLS", () => {
-  it("defines the six tools", () => {
+  it("defines the eight runAgy tools", () => {
     expect(TOOLS.map((t) => t.name).sort()).toEqual([
       "adversarial_review",
       "analyze_files",
       "deep_search",
       "delegate",
       "follow_up",
+      "image_gen",
+      "pre_finish_review",
       "web_lookup",
     ]);
+  });
+
+  it("exposes session_transfer as a standalone ToolDef (not a runAgy tool)", () => {
+    expect(SESSION_TRANSFER_TOOL.name).toBe("session_transfer");
+    expect(SESSION_TRANSFER_TOOL.schema).toHaveProperty("cwd");
+    expect(TOOLS.find((t) => t.name === "session_transfer")).toBeUndefined();
   });
 
   it("every tool except follow_up has a non-empty model chain", () => {
@@ -34,7 +43,10 @@ describe("TOOLS", () => {
 
 describe("resolveFiles", () => {
   it("resolves relative paths against cwd, keeps absolute", () => {
-    expect(resolveFiles(["a.ts", "/abs/b.ts"], "/repo")).toEqual(["/repo/a.ts", "/abs/b.ts"]);
+    expect(resolveFiles(["a.ts", "/abs/b.ts"], "/repo")).toEqual([
+      path.resolve("/repo", "a.ts"),
+      "/abs/b.ts",
+    ]);
   });
 });
 
@@ -46,7 +58,7 @@ describe("prompt templates", () => {
       { files: ["x.log"], question: "find errors" },
       "/repo",
     );
-    expect(p).toContain("/repo/x.log");
+    expect(p).toContain(path.resolve("/repo", "x.log"));
     expect(p).toContain("find errors");
     expect(p).toMatch(/file:line/);
   });
@@ -63,6 +75,20 @@ describe("prompt templates", () => {
 
   it("adversarial_review requires content or files", () => {
     expect(() => get("adversarial_review").buildPrompt({}, "/repo")).toThrow(/content.*files/i);
+  });
+
+  it("pre_finish_review builds an adversarial-review prompt from content + focus", () => {
+    const p = get("pre_finish_review").buildPrompt(
+      { content: "diff --git a/x b/x", focus: "concurrency" },
+      "/repo",
+    );
+    expect(p).toContain("diff --git a/x b/x");
+    expect(p).toContain("concurrency");
+    expect(p).toMatch(/severity/i);
+  });
+
+  it("pre_finish_review requires content or files", () => {
+    expect(() => get("pre_finish_review").buildPrompt({}, "/repo")).toThrow(/content.*files/i);
   });
 
   it("follow_up passes the question through verbatim", () => {

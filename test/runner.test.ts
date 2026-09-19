@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import path from "node:path";
 import {
   buildArgs,
   truncate,
@@ -33,6 +34,7 @@ interface FakeOpts {
   spawnError?: NodeJS.ErrnoException;
   neverExit?: boolean;
   log?: string;
+  pid?: number;
 }
 
 function fakeDeps(opts: FakeOpts = {}) {
@@ -43,6 +45,9 @@ function fakeDeps(opts: FakeOpts = {}) {
   const child: ChildHandle = {
     stdout: () => opts.stdout ?? "",
     stderr: () => opts.stderr ?? "",
+    // runAgy resolves the session-map key with path.resolve(cwd); mirror that
+    // here so the fixture matches on both POSIX (/repo) and Windows (C:\repo).
+    pid: () => opts.pid,
     wait: () =>
       opts.neverExit
         ? new Promise(() => {})
@@ -61,7 +66,7 @@ function fakeDeps(opts: FakeOpts = {}) {
     removeLog: async (p) => {
       removed.push(p);
     },
-    readSessionsFile: async () => JSON.stringify({ "/repo": "sess-42" }),
+    readSessionsFile: async () => JSON.stringify({ [path.resolve("/repo")]: "sess-42" }),
     makeLogPath: () => "/tmp/agy-bridge-test.log",
     pollMs: 5,
     graceMs: 20,
@@ -130,11 +135,18 @@ describe("truncate", () => {
 
 describe("execWithClosedStdin", () => {
   it("closes child stdin so stdin-reading commands exit instead of hanging", async () => {
-    const r = await execWithClosedStdin("cat", [], {
-      cwd: process.cwd(),
-      timeout: 5000,
-      maxBuffer: 1024,
-    });
+    // `cat` is absent on Windows (ENOENT). Use node (always present under
+    // vitest) reading stdin until EOF — execWithClosedStdin ends stdin at
+    // once, so this echoes "" and exits 0 instead of hanging.
+    const r = await execWithClosedStdin(
+      process.execPath,
+      [
+        "-e",
+        "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{" +
+          "process.stdout.write(d);process.exit(0)})",
+      ],
+      { cwd: process.cwd(), timeout: 5000, maxBuffer: 1024 },
+    );
     expect(r.stdout).toBe("");
   });
 });

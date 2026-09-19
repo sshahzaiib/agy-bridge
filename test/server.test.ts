@@ -45,6 +45,7 @@ function fakeDeps(quotaModels: string[] = []) {
       const child: ChildHandle = {
         stdout: () => (quota ? "" : "the answer"),
         stderr: () => "",
+        pid: () => undefined,
         wait: () => Promise.resolve({ code: 0 }),
         kill: () => {},
       };
@@ -197,5 +198,21 @@ describe("createToolHandler", () => {
     const res = await handlerFor("delegate", f)({ prompt: "x" }, { signal: ac.signal });
     expect(res.isError).toBe(true);
     expect((res.content[0] as { text: string }).text).toMatch(/cancelled/i);
+  });
+
+  it("pre_finish_review runs agy and returns findings text", async () => {
+    const f = fakeDeps();
+    const res = await handlerFor("pre_finish_review", f)({ content: "diff --git a/x b/x" });
+    const text = (res.content[0] as { text: string }).text;
+    expect(res.isError).toBeUndefined();
+    expect(text).toContain("the answer");
+    expect(text).toContain("model:");
+  });
+
+  it("pre_finish_review errors when neither content nor files is given", async () => {
+    const f = fakeDeps();
+    const res = await handlerFor("pre_finish_review", f)({});
+    expect(res.isError).toBe(true);
+    expect((res.content[0] as { text: string }).text).toMatch(/content.*files/i);
   });
 });

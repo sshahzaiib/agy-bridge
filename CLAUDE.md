@@ -15,3 +15,12 @@ come back. Prefer delegating over doing it yourself when:
 
 Do NOT delegate: small single-file edits, questions you can answer from
 context already loaded, or tasks needing tools only you have.
+
+## Pre-finish review
+
+Before you declare a task **complete / fixed / passing**, call
+`pre_finish_review` on the work-in-progress. Pass the diff or plan as `content`,
+or the changed file paths as `files` (optional `focus` like "security"). It runs
+an adversarial second-opinion pass and returns findings as **advisory text** —
+non-blocking, but it catches bugs, edge cases, and unstated assumptions you may
+have missed. Weigh the findings with judgement; they do not gate completion.

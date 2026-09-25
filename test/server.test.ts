@@ -18,7 +18,7 @@ const cfg: Config = {
   onFailure: "fallback",
 };
 
-const LISTING = "Gemini 3.5 Flash (Medium)\nGemini 3.5 Flash (High)\nGemini 3.1 Pro (High)\n";
+const LISTING = "Gemini 3.8 Flash (Medium)\nGemini 3.8 Flash (High)\nGemini 3.1 Pro (High)\n";
 
 const LOG_429 =
   "E0613 log.go:398] agent executor error: RESOURCE_EXHAUSTED (code 429): " +
@@ -83,7 +83,7 @@ describe("createToolHandler", () => {
     const res = await handlerFor("delegate", f)({ prompt: "do x" });
     const text = (res.content[0] as { text: string }).text;
     expect(text).toContain("the answer");
-    expect(text).toContain("Gemini 3.5 Flash (High)");
+    expect(text).toContain("Gemini 3.8 Flash (High)");
     expect(text).toContain("sess-1");
     expect(f.runs[0].args).toContain("--model");
   });
@@ -132,37 +132,37 @@ describe("createToolHandler", () => {
   });
 
   it("fails over to the next chain model on quota exhaustion", async () => {
-    const f = fakeDeps(["Gemini 3.5 Flash (Medium)"]);
+    const f = fakeDeps(["Gemini 3.8 Flash (Medium)"]);
     const res = await handlerFor("web_lookup", f)({ query: "docs" });
     const text = (res.content[0] as { text: string }).text;
     expect(res.isError).toBeUndefined();
     expect(f.runs).toHaveLength(2);
-    expect(f.modelOf(f.runs[0])).toBe("Gemini 3.5 Flash (Medium)");
-    expect(f.modelOf(f.runs[1])).toBe("Gemini 3.5 Flash (High)");
+    expect(f.modelOf(f.runs[0])).toBe("Gemini 3.8 Flash (Medium)");
+    expect(f.modelOf(f.runs[1])).toBe("Gemini 3.8 Flash (High)");
     expect(text).toContain("the answer");
-    expect(text).toContain("model: Gemini 3.5 Flash (High)");
-    expect(text).toMatch(/failover.*Gemini 3.5 Flash \(Medium\).*quota/i);
+    expect(text).toContain("model: Gemini 3.8 Flash (High)");
+    expect(text).toMatch(/failover.*Gemini 3.8 Flash \(Medium\).*quota/i);
   });
 
   it("skips cooled-down models on subsequent calls without spawning them", async () => {
-    const f = fakeDeps(["Gemini 3.5 Flash (Medium)"]);
+    const f = fakeDeps(["Gemini 3.8 Flash (Medium)"]);
     const cooldowns = new CooldownRegistry();
     const handler = handlerFor("web_lookup", f, {}, cooldowns);
     await handler({ query: "first" });
     expect(f.runs).toHaveLength(2);
     await handler({ query: "second" });
     expect(f.runs).toHaveLength(3);
-    expect(f.modelOf(f.runs[2])).toBe("Gemini 3.5 Flash (High)");
+    expect(f.modelOf(f.runs[2])).toBe("Gemini 3.8 Flash (High)");
   });
 
   it("errors with reset times when every chain model is quota-exhausted", async () => {
-    const f = fakeDeps(["Gemini 3.5 Flash (Medium)", "Gemini 3.5 Flash (High)"]);
+    const f = fakeDeps(["Gemini 3.8 Flash (Medium)", "Gemini 3.8 Flash (High)"]);
     const res = await handlerFor("web_lookup", f)({ query: "docs" });
     expect(res.isError).toBe(true);
     const text = (res.content[0] as { text: string }).text;
     expect(text).toMatch(/quota/i);
-    expect(text).toContain("Gemini 3.5 Flash (Medium)");
-    expect(text).toContain("Gemini 3.5 Flash (High)");
+    expect(text).toContain("Gemini 3.8 Flash (Medium)");
+    expect(text).toContain("Gemini 3.8 Flash (High)");
     expect(text).toContain("4h24m");
   });
 

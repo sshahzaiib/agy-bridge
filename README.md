@@ -142,6 +142,11 @@ npm run typecheck
 npm run build      # tsup → dist/index.js
 ```
 
+## Support
+
+agy-bridge is free and MIT-licensed. If it saves you tokens every day,
+[Ko-fi](https://ko-fi.com/sshahzaiib) keeps it maintained.
+
 ## Contributors
 
 Contributions are welcome — open an issue or PR.

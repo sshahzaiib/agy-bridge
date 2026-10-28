@@ -38,6 +38,10 @@
     "type": "git",
     "url": "git+https://github.com/sshahzaiib/agy-bridge.git"
   },
+  "funding": {
+    "type": "ko-fi",
+    "url": "https://ko-fi.com/sshahzaiib"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

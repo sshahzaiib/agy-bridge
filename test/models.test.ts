@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseModels, parseModelEntries, ModelRegistry } from "../src/models.js";
+import { parseModels, parseModelEntries, pickModel, ModelRegistry } from "../src/models.js";
 
 const LISTING = `Gemini 3.5 Flash (Medium)
 Gemini 3.5 Flash (High)
@@ -161,5 +161,52 @@ describe("ModelRegistry.resolve", () => {
     await reg.resolve({ chain: ["Gemini 3.5 Flash (High)"] });
     await reg.resolve({ chain: ["Gemini 3.1 Pro (High)"] });
     expect(calls).toBe(1);
+  });
+});
+
+describe("pickModel", () => {
+  const avail = [
+    "Gemini 3.7 Flash (High)",
+    "Gemini 3.8 Flash (High)",
+    "Gemini 3.8 Flash (Medium)",
+    "Gemini 3.10 Flash (High)",
+    "Claude Opus 4.6 (Thinking)",
+  ];
+
+  it("resolves * to the newest version, comparing numerically", () => {
+    expect(pickModel("Gemini * Flash (High)", avail)).toBe("Gemini 3.10 Flash (High)");
+    expect(pickModel("Claude Opus * (Thinking)", avail)).toBe("Claude Opus 4.6 (Thinking)");
+  });
+
+  it("matches tier and parentheses literally", () => {
+    expect(pickModel("Gemini * Flash (Medium)", avail)).toBe("Gemini 3.8 Flash (Medium)");
+    expect(pickModel("Gemini * Pro (High)", avail)).toBeUndefined();
+  });
+
+  it("passes exact names through unchanged", () => {
+    expect(pickModel("Gemini 3.7 Flash (High)", avail)).toBe("Gemini 3.7 Flash (High)");
+    expect(pickModel("Gemini 9.9 Flash (High)", avail)).toBeUndefined();
+  });
+
+  it("explicit and defaultModel accept patterns too", async () => {
+    const reg = new ModelRegistry(async () => avail.join("\n"));
+    expect((await reg.resolve({ explicit: "Gemini * Flash (Medium)", chain: [] })).model).toBe(
+      "Gemini 3.8 Flash (Medium)",
+    );
+    expect(
+      (
+        await reg.resolve({
+          chain: ["Gemini * Pro (High)"],
+          defaultModel: "Claude Opus * (Thinking)",
+        })
+      ).model,
+    ).toBe("Claude Opus 4.6 (Thinking)");
+  });
+
+  it("resolveChain expands patterns and dedupes", async () => {
+    const r = await new ModelRegistry(async () => avail.join("\n")).resolveChain({
+      chain: ["Gemini * Flash (High)", "Gemini 3.10 Flash (High)", "Gemini * Pro (High)"],
+    });
+    expect(r.models).toEqual(["Gemini 3.10 Flash (High)"]);
   });
 });

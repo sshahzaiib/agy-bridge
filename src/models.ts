@@ -30,8 +30,38 @@ export function parseModels(output: string): string[] {
   return parseModelEntries(output).map((e) => e.name);
 }
 
+/**
+ * Expands a chain pattern against the available display names. A single `*`
+ * stands for a version number (`Gemini * Flash (High)`) and resolves to the
+ * newest matching model, so chains survive model releases. Patterns without
+ * `*` must match exactly.
+ */
+export function pickModel(pattern: string, available: string[]): string | undefined {
+  if (!pattern.includes("*")) return available.includes(pattern) ? pattern : undefined;
+  const [head, tail] = pattern.split("*", 2);
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`^${escape(head)}(\\d+(?:\\.\\d+)*)${escape(tail ?? "")}$`);
+  let best: { name: string; version: number[] } | undefined;
+  for (const name of available) {
+    const m = re.exec(name);
+    if (!m) continue;
+    const version = m[1].split(".").map(Number);
+    if (!best || compareVersions(version, best.version) > 0) best = { name, version };
+  }
+  return best?.name;
+}
+
+function compareVersions(a: number[], b: number[]): number {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const d = (a[i] ?? 0) - (b[i] ?? 0);
+    if (d !== 0) return d;
+  }
+  return 0;
+}
+
 export interface ResolveOptions {
   explicit?: string;
+  /** Preference order; entries may be exact display names or `*` version patterns (see `pickModel`). */
   chain: string[];
   defaultModel?: string;
 }
@@ -92,8 +122,8 @@ export class ModelRegistry {
           note: "could not list agy models; passing model through unvalidated",
         };
       }
-      const explicit = canonical(opts.explicit);
-      if (available.includes(explicit)) return { models: [explicit] };
+      const explicit = pickModel(canonical(opts.explicit), available);
+      if (explicit) return { models: [explicit] };
       throw new Error(
         `Model "${opts.explicit}" is not available. Available models:\n${available.join("\n")}`,
       );
@@ -105,9 +135,9 @@ export class ModelRegistry {
         note: "could not list agy models; using agy's own default model",
       };
     }
-    const models = opts.chain.filter((m) => available.includes(m));
-    const defaultModel = opts.defaultModel && canonical(opts.defaultModel);
-    if (defaultModel && available.includes(defaultModel) && !models.includes(defaultModel)) {
+    const models = [...new Set(opts.chain.flatMap((p) => pickModel(p, available) ?? []))];
+    const defaultModel = opts.defaultModel && pickModel(canonical(opts.defaultModel), available);
+    if (defaultModel && !models.includes(defaultModel)) {
       models.push(defaultModel);
     }
     if (models.length === 0) {

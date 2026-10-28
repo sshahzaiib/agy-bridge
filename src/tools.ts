@@ -35,6 +35,9 @@ export interface ToolDef {
   buildPrompt(args: Record<string, unknown>, cwd: string): string;
 }
 
+// Gemini first, always; other families only when no Gemini model is listed at all.
+const NON_GEMINI_FALLBACK = ["Claude Opus * (Thinking)", "GPT-OSS 120B (Medium)"];
+
 export const TOOLS: ToolDef[] = [
   {
     name: "analyze_files",
@@ -51,7 +54,7 @@ export const TOOLS: ToolDef[] = [
       question: z.string().describe("What you want to know about these files."),
       ...commonShape,
     },
-    chain: ["Gemini * Flash (High)", "Gemini * Pro (Low)"],
+    chain: ["Gemini * Flash (High)", "Gemini * Pro (Low)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 300,
     buildPrompt(args, cwd) {
       const files = resolveFiles(args.files as string[], cwd);
@@ -73,7 +76,7 @@ export const TOOLS: ToolDef[] = [
         .describe("What to find, e.g. 'when was the auth middleware refactored and why'."),
       ...commonShape,
     },
-    chain: ["Gemini * Flash (Medium)", "Gemini * Flash (High)"],
+    chain: ["Gemini * Flash (Medium)", "Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 180,
     buildPrompt(args) {
       return (
@@ -93,7 +96,7 @@ export const TOOLS: ToolDef[] = [
       query: z.string().describe("What to look up on the web."),
       ...commonShape,
     },
-    chain: ["Gemini * Flash (Medium)", "Gemini * Flash (High)"],
+    chain: ["Gemini * Flash (Medium)", "Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 120,
     buildPrompt(args) {
       return `Look up on the web: ${args.query}\n\nInclude source URLs for key claims. ${OUTPUT_RULES}`;
@@ -117,7 +120,7 @@ export const TOOLS: ToolDef[] = [
       focus: z.string().optional().describe("Optional focus area, e.g. 'security', 'concurrency'."),
       ...commonShape,
     },
-    chain: ["Gemini * Pro (High)", "Claude Opus * (Thinking)", "Gemini * Flash (High)"],
+    chain: ["Gemini * Pro (High)", "Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 300,
     buildPrompt(args, cwd) {
       const files = args.files as string[] | undefined;
@@ -165,7 +168,7 @@ export const TOOLS: ToolDef[] = [
       prompt: z.string().describe("The complete task prompt for agy."),
       ...commonShape,
     },
-    chain: ["Gemini * Flash (High)"],
+    chain: ["Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 600,
     buildPrompt(args) {
       return args.prompt as string;

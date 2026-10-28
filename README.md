@@ -73,14 +73,14 @@ response` while the agy run is still going. If your client doesn't honor a
 
 ## Tools
 
-| Tool                 | Use for                                                         | Model routing (first available)                           |
-| -------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| `analyze_files`      | Files >200 lines, >3 files at once, logs, dumps, generated code | Gemini Flash (High) → Gemini Pro (Low)                    |
-| `deep_search`        | git log/diff/blame archaeology, repo-wide greps                 | Gemini Flash (Medium) → (High)                            |
-| `web_lookup`         | Docs, API references, external/current knowledge                | Gemini Flash (Medium) → (High)                            |
-| `adversarial_review` | Plan critiques, design and code reviews                         | Gemini Pro (High) → Claude Opus (Thinking) → Flash (High) |
-| `follow_up`          | Continue a prior session by `session_id` — no context resend    | inherits the session                                      |
-| `delegate`           | Anything else heavy                                             | Gemini Flash (High)                                       |
+| Tool                 | Use for                                                         | Model routing (first available)                    |
+| -------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
+| `analyze_files`      | Files >200 lines, >3 files at once, logs, dumps, generated code | Gemini Flash (High) → Gemini Pro (Low) → fallback  |
+| `deep_search`        | git log/diff/blame archaeology, repo-wide greps                 | Gemini Flash (Medium) → (High) → fallback          |
+| `web_lookup`         | Docs, API references, external/current knowledge                | Gemini Flash (Medium) → (High) → fallback          |
+| `adversarial_review` | Plan critiques, design and code reviews                         | Gemini Pro (High) → Gemini Flash (High) → fallback |
+| `follow_up`          | Continue a prior session by `session_id` — no context resend    | inherits the session                               |
+| `delegate`           | Anything else heavy                                             | Gemini Flash (High) → fallback                     |
 
 All tools accept optional `cwd` (project root) and `model` (an id or display name from `agy models`; validated, with available models listed on mismatch).
 
@@ -93,7 +93,7 @@ Every response ends with a footer:
 
 ### Model routing
 
-On first use the bridge runs `agy models` (cached for the process lifetime) and picks the first available model in the tool's preference chain. Chain entries name a family and tier rather than a version (`Gemini * Flash (High)`), and `*` resolves to the newest version agy currently lists, so a Gemini release never silently breaks routing. If none is available it falls back to `AGY_DEFAULT_MODEL`, and finally to agy's own default. agy silently ignores unknown `--model` values, so the bridge validates names up front instead of letting requests land on the wrong model.
+On first use the bridge runs `agy models` (cached for the process lifetime) and picks the first available model in the tool's preference chain. Chain entries name a family and tier rather than a version (`Gemini * Flash (High)`), and `*` resolves to the newest version agy currently lists, so a Gemini release never silently breaks routing. Chains are Gemini-first; Claude Opus and GPT-OSS are appended as a last resort and only used when no Gemini model is listed. If none is available it falls back to `AGY_DEFAULT_MODEL`, and finally to agy's own default. agy silently ignores unknown `--model` values, so the bridge validates names up front instead of letting requests land on the wrong model.
 
 ### Quota-aware failover
 

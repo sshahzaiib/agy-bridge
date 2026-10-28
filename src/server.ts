@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { loadConfig, type Config } from "./config.js";
 import { ModelRegistry } from "./models.js";
@@ -118,7 +119,8 @@ export function createServer(): McpServer {
   });
   const cooldowns = new CooldownRegistry();
 
-  const server = new McpServer({ name: "agy-bridge", version: "0.4.0" });
+  const { version } = createRequire(import.meta.url)("../package.json") as { version: string };
+  const server = new McpServer({ name: "agy-bridge", version });
   for (const tool of TOOLS) {
     server.registerTool(
       tool.name,

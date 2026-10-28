@@ -73,14 +73,14 @@ response` while the agy run is still going. If your client doesn't honor a
 
 ## Tools
 
-| Tool                 | Use for                                                         | Model routing (first available)                                   |
-| -------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `analyze_files`      | Files >200 lines, >3 files at once, logs, dumps, generated code | Gemini 3.8 Flash (High) → Gemini 3.1 Pro (Low)                    |
-| `deep_search`        | git log/diff/blame archaeology, repo-wide greps                 | Gemini 3.8 Flash (Medium) → (High)                                |
-| `web_lookup`         | Docs, API references, external/current knowledge                | Gemini 3.8 Flash (Medium) → (High)                                |
-| `adversarial_review` | Plan critiques, design and code reviews                         | Gemini 3.1 Pro (High) → Claude Opus 4.6 (Thinking) → Flash (High) |
-| `follow_up`          | Continue a prior session by `session_id` — no context resend    | inherits the session                                              |
-| `delegate`           | Anything else heavy                                             | Gemini 3.8 Flash (High)                                           |
+| Tool                 | Use for                                                         | Model routing (first available)                    |
+| -------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
+| `analyze_files`      | Files >200 lines, >3 files at once, logs, dumps, generated code | Gemini Flash (High) → Gemini Pro (Low) → fallback  |
+| `deep_search`        | git log/diff/blame archaeology, repo-wide greps                 | Gemini Flash (Medium) → (High) → fallback          |
+| `web_lookup`         | Docs, API references, external/current knowledge                | Gemini Flash (Medium) → (High) → fallback          |
+| `adversarial_review` | Plan critiques, design and code reviews                         | Gemini Pro (High) → Gemini Flash (High) → fallback |
+| `follow_up`          | Continue a prior session by `session_id` — no context resend    | inherits the session                               |
+| `delegate`           | Anything else heavy                                             | Gemini Flash (High) → fallback                     |
 
 All tools accept optional `cwd` (project root) and `model` (an id or display name from `agy models`; validated, with available models listed on mismatch).
 
@@ -88,12 +88,12 @@ Every response ends with a footer:
 
 ```
 ---
-[agy-bridge] model: Gemini 3.8 Flash (High) | session: 1f0c…-d4 (use follow_up to continue)
+[agy-bridge] model: Gemini Flash (High) | session: 1f0c…-d4 (use follow_up to continue)
 ```
 
 ### Model routing
 
-On first use the bridge runs `agy models` (cached for the process lifetime) and picks the first available model in the tool's preference chain. If none is available it falls back to `AGY_DEFAULT_MODEL`, and finally to agy's own default. agy silently ignores unknown `--model` values, so the bridge validates names up front instead of letting requests land on the wrong model.
+On first use the bridge runs `agy models` (cached for the process lifetime) and picks the first available model in the tool's preference chain. Chain entries name a family and tier rather than a version (`Gemini * Flash (High)`), and `*` resolves to the newest version agy currently lists, so a Gemini release never silently breaks routing. Chains are Gemini-first; Claude Opus and GPT-OSS are appended as a last resort and only used when no Gemini model is listed. If none is available it falls back to `AGY_DEFAULT_MODEL`, and finally to agy's own default. agy silently ignores unknown `--model` values, so the bridge validates names up front instead of letting requests land on the wrong model.
 
 ### Quota-aware failover
 
@@ -124,7 +124,7 @@ All optional, via environment variables:
 | `AGY_TIMEOUT`          | per-tool   | Seconds; overrides all per-tool timeouts at once (see above), passed as `--print-timeout`, enforced with a 15s kill grace |
 | `AGY_TIMEOUT_<TOOL>`   | per-tool   | Seconds; overrides the timeout for a single tool only, e.g. `AGY_TIMEOUT_DEEP_SEARCH=300`. Wins over `AGY_TIMEOUT`        |
 | `AGY_MAX_OUTPUT_CHARS` | `50000`    | Truncation cap for tool output                                                                                            |
-| `AGY_DEFAULT_MODEL`    | unset      | Fallback model when no chain entry is available                                                                           |
+| `AGY_DEFAULT_MODEL`    | unset      | Fallback model when no chain entry is available (name, id, or `*` pattern)                                                |
 | `AGY_SKIP_PERMISSIONS` | `true`     | Pass `--dangerously-skip-permissions` to agy                                                                              |
 | `AGY_SANDBOX`          | `false`    | Run agy with `--sandbox`                                                                                                  |
 | `AGY_ON_FAILURE`       | `fallback` | `strict` appends an instruction to failed-tool errors telling the calling agent not to absorb the work itself             |

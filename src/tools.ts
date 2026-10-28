@@ -20,7 +20,7 @@ const commonShape = {
     .string()
     .optional()
     .describe(
-      'Override the model (exact name from `agy models`, e.g. "Gemini 3.1 Pro (High)"). ' +
+      'Override the model: a name or id from `agy models`, or a `*` version pattern such as "Gemini * Pro (High)". ' +
         "Normally omit — the tool routes automatically.",
     ),
 };
@@ -34,6 +34,9 @@ export interface ToolDef {
   timeoutSec: number;
   buildPrompt(args: Record<string, unknown>, cwd: string): string;
 }
+
+// Gemini first, always; other families only when no Gemini model is listed at all.
+const NON_GEMINI_FALLBACK = ["Claude Opus * (Thinking)", "GPT-OSS 120B (Medium)"];
 
 export const TOOLS: ToolDef[] = [
   {
@@ -51,7 +54,7 @@ export const TOOLS: ToolDef[] = [
       question: z.string().describe("What you want to know about these files."),
       ...commonShape,
     },
-    chain: ["Gemini 3.8 Flash (High)", "Gemini 3.1 Pro (Low)"],
+    chain: ["Gemini * Flash (High)", "Gemini * Pro (Low)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 300,
     buildPrompt(args, cwd) {
       const files = resolveFiles(args.files as string[], cwd);
@@ -73,7 +76,7 @@ export const TOOLS: ToolDef[] = [
         .describe("What to find, e.g. 'when was the auth middleware refactored and why'."),
       ...commonShape,
     },
-    chain: ["Gemini 3.8 Flash (Medium)", "Gemini 3.8 Flash (High)"],
+    chain: ["Gemini * Flash (Medium)", "Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 180,
     buildPrompt(args) {
       return (
@@ -93,7 +96,7 @@ export const TOOLS: ToolDef[] = [
       query: z.string().describe("What to look up on the web."),
       ...commonShape,
     },
-    chain: ["Gemini 3.8 Flash (Medium)", "Gemini 3.8 Flash (High)"],
+    chain: ["Gemini * Flash (Medium)", "Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 120,
     buildPrompt(args) {
       return `Look up on the web: ${args.query}\n\nInclude source URLs for key claims. ${OUTPUT_RULES}`;
@@ -117,7 +120,7 @@ export const TOOLS: ToolDef[] = [
       focus: z.string().optional().describe("Optional focus area, e.g. 'security', 'concurrency'."),
       ...commonShape,
     },
-    chain: ["Gemini 3.1 Pro (High)", "Claude Opus 4.6 (Thinking)", "Gemini 3.8 Flash (High)"],
+    chain: ["Gemini * Pro (High)", "Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 300,
     buildPrompt(args, cwd) {
       const files = args.files as string[] | undefined;
@@ -165,7 +168,7 @@ export const TOOLS: ToolDef[] = [
       prompt: z.string().describe("The complete task prompt for agy."),
       ...commonShape,
     },
-    chain: ["Gemini 3.8 Flash (High)"],
+    chain: ["Gemini * Flash (High)", ...NON_GEMINI_FALLBACK],
     timeoutSec: 600,
     buildPrompt(args) {
       return args.prompt as string;

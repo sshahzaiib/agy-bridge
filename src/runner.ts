@@ -65,7 +65,7 @@ export const SESSIONS_FILE = path.join(
 
 // agy reads stdin until EOF even in print mode; an open stdin pipe hangs it forever.
 export const execWithClosedStdin: ExecFn = (file, args, options) => {
-  const promise = execFileAsync(file, args, options);
+  const promise = execFileAsync(file, args, { windowsHide: true, ...options });
   promise.child.stdin?.end();
   return promise;
 };
@@ -74,7 +74,13 @@ const MAX_STDOUT_CHARS = 64 * 1024 * 1024;
 const MAX_STDERR_CHARS = 1024 * 1024;
 
 function spawnDetached(file: string, args: string[], cwd: string): ChildHandle {
-  const child = spawn(file, args, { cwd, detached: true });
+  // detached gives POSIX a process group to kill; on Windows it maps to
+  // DETACHED_PROCESS, which makes agy and its MCP children pop console windows (#20).
+  const child = spawn(file, args, {
+    cwd,
+    detached: process.platform !== "win32",
+    windowsHide: true,
+  });
   child.stdin?.end();
 
   let out = "";

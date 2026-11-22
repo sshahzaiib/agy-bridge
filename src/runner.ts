@@ -83,7 +83,8 @@ export type TreeKillExecFn = (
 ) => Promise<{ stdout: string; stderr: string }>;
 
 export const defaultTreeKillExec: TreeKillExecFn = (file, args) =>
-  execFileAsync(file, args, { timeout: 10_000, maxBuffer: 64 * 1024 });
+  // windowsHide: taskkill is a console app and would flash a window (#20).
+  execFileAsync(file, args, { timeout: 10_000, maxBuffer: 64 * 1024, windowsHide: true });
 
 /**
  * Cross-platform process-tree kill. Replaces the Windows-broken

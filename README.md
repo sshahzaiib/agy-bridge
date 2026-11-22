@@ -26,6 +26,11 @@ Claude sends a task → the bridge routes it to the best available model via `ag
 [![mcp.so](https://img.shields.io/badge/mcp.so-agy--bridge-22c55e)](https://mcp.so/server/agy-bridge/sshahzaiib)
 [![MCP Servers](https://img.shields.io/badge/MCP%20Servers-agy--bridge-f59e0b)](https://mcpservers.org/servers/sshahzaiib/agy-bridge)
 [![Verified on MseeP](https://img.shields.io/badge/MseeP.ai-verified-2563eb)](https://mseep.ai/app/2f439062-d211-4a6c-b41b-3a603f490a32)
+[![Listed on MCP ServerList](https://mcp-serverlist.com/api/badge/agy-bridge)](https://mcp-serverlist.com/mcp/agy-bridge)
+
+<a href="https://ko-fi.com/sshahzaiib"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=6" alt="Buy me a coffee on Ko-fi" height="48"></a>
+<br>
+<sub>agy-bridge is free and MIT-licensed. If it saves you tokens every day, a coffee keeps it maintained.</sub>
 
 </div>
 
